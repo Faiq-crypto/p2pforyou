@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+                                    things are fine but copy address button is still not working also maximum limit is 500, do not let user put more than 500 in enter usdt amount slot. also make background like uniswap in this code.<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,17 +6,17 @@
   <title>P2Pforyou - Sell USDT</title>
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0d111c, #141826, #0d111c);
-      --container-bg: rgba(25, 26, 35, 0.95);
+      --bg-color: #0d111c;
+      --container-bg: #1e1f2b;
       --accent: #00ff88;
       --button-bg: #e600ff;
-      --field-bg: rgba(38, 39, 55, 0.9);
+      --field-bg: #1a1a1a;
       --text-light: #fff;
     }
 
     body {
       margin: 0;
-      background: var(--bg-gradient);
+      background-color: var(--bg-color);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: var(--text-light);
       padding: 16px;
@@ -24,7 +24,6 @@
       background-repeat: no-repeat;
       background-position: bottom right;
       background-size: 80px;
-      background-attachment: fixed;
     }
 
     .container {
@@ -33,19 +32,18 @@
       padding: 20px;
       background-color: var(--container-bg);
       border-radius: 16px;
-      box-shadow: 0 0 25px rgba(0, 255, 100, 0.15);
+      box-shadow: 0 0 15px rgba(0, 255, 100, 0.2);
       animation: fadeIn 0.3s ease-in-out;
-      backdrop-filter: blur(6px);
     }
 
     h1 {
       text-align: center;
-      font-size: 22px;
+      font-size: 24px;
       margin-bottom: 20px;
     }
 
     .rate-box {
-      background-color: rgba(44, 47, 69, 0.85);
+      background-color: #2c2f45;
       padding: 12px;
       border-radius: 12px;
       font-size: 14px;
@@ -68,13 +66,6 @@
       background-color: var(--field-bg);
       color: white;
       font-size: 14px;
-      backdrop-filter: blur(3px);
-    }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
     }
 
     button[type="submit"] {
@@ -105,13 +96,11 @@
       flex: 1;
       font-size: 14px;
       padding: 10px;
-      background-color: var(--field-bg);
-      border: none;
     }
 
     .copy-button {
-      padding: 8px;
-      font-size: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
       background-color: #3b3d56;
       border: none;
       border-radius: 6px;
@@ -151,75 +140,154 @@
       }
 
       .copy-button {
-        padding: 6px;
-        font-size: 11px;
+        padding: 8px 10px;
+        font-size: 12px;
       }
     }
   </style>
 </head>
 <body>
-
   <div class="container">
-    <h1>Sell USDT</h1>
+    <h1>P2Pforyou - Sell USDT</h1>
 
     <div class="rate-box">
-      <p>Rate based on amount:</p>
-      <ul>
-        <li>1–10 USDT = ₹83</li>
-        <li>10–40 USDT = ₹84</li>
-        <li>40–500 USDT = ₹85</li>
-      </ul>
+      <strong>USDT to INR Rates:</strong>
+      <p>1.2 – 10 USDT = ₹83</p>
+      <p>10 – 30.99 USDT = ₹84</p>
+      <p>30.99 – 100.99 USDT = ₹85.2</p>
+      <p>100.99 – 380.9 USDT = ₹86</p>
+      <p>380.9 – 500 USDT = ₹86.6</p>
+      <p style="color: var(--accent); font-weight: bold;">💡 Add more USDT to get a higher rate!</p>
     </div>
 
-    <form action="submit.php" method="post" enctype="multipart/form-data">
-      <label for="usdt_amount">Enter USDT amount (max 500):</label>
-      <input type="number" id="usdt_amount" name="usdt_amount" step="0.01" min="1.2" max="500" required>
-
-      <label for="network">Select USDT network:</label>
-      <select id="network" name="network" required>
-        <option value="">-- Select Network --</option>
-        <option value="TRC20">TRC20</option>
-        <option value="BEP20">BEP20</option>
-        <option value="Polygon">Polygon</option>
+    <form action="submit.php" method="POST" enctype="multipart/form-data">
+      <label>Select USDT Network:</label>
+      <select name="network" id="network" required onchange="updateAddress()">
+        <option value="BEP20">USDT BEP20</option>
+        <option value="Polygon">USDT Polygon</option>
+        <option value="TRC20">USDT TRC20</option>
       </select>
 
-      <label for="wallet_address">Your Wallet Address:</label>
+      <label>Enter USDT Amount (1.2 - 500):</label>
+      <input type="number" id="usdt" name="usdt_amount" min="1.2" max="500" step="0.01" required />
+      <p id="rateDisplay"></p>
+      <p id="inrDisplay"></p>
+
+      <label>Send USDT to This Wallet Address:</label>
       <div class="copy-container">
-        <input type="text" id="wallet_address" name="wallet_address" value="TSfY6iUu2w3Xwq9x4RPkeHzGnMQauG9YoX" readonly>
-        <button class="copy-button" type="button" onclick="copyAddress()">Copy</button>
+        <input type="text" id="usdt_address" name="usdt_address" value="0x1A63d865D881E15D4103a5c031a67C0d63e9849C" readonly />
+        <button type="button" class="copy-button" onclick="copyAddress()">📋</button>
       </div>
 
-      <label for="payment_mode">Payment Mode:</label>
-      <select id="payment_mode" name="payment_mode" required>
+      <label>Choose Payment Receiving Mode:</label>
+      <select name="payment_mode" id="payment_mode" required onchange="showFields()">
+        <option value="">-- Select Payment Mode --</option>
         <option value="UPI">UPI</option>
-        <option value="Bank Transfer">Bank Transfer</option>
         <option value="CDM">CDM</option>
+        <option value="Bank">Bank Transfer</option>
       </select>
 
-      <label for="scanner">Upload scanner (PNG only):</label>
-      <input type="file" name="scanner" id="scanner" accept="image/png" required>
+      <!-- UPI Fields -->
+      <div id="upi_fields" class="hidden">
+        <label>Enter Your UPI ID:</label>
+        <input type="text" name="upi_id" placeholder="yourupi@bank" />
+        <label>Upload Scanner File (PNG only):</label>
+        <input type="file" name="scanner" accept=".png" />
+      </div>
 
-      <label for="bank_details">Enter UPI ID / Bank details:</label>
-      <textarea name="bank_details" rows="3" placeholder="Enter your UPI ID, Bank Name, Account Number, etc." required></textarea>
+      <!-- CDM Fields -->
+      <div id="cdm_fields" class="hidden">
+        <label>Account Number:</label>
+        <input type="text" name="cdm_account_number" />
+        <label>Name of Bank:</label>
+        <input type="text" name="cdm_bank_name" />
+        <label>Name of Account Holder:</label>
+        <input type="text" name="cdm_holder_name" />
+      </div>
+
+      <!-- Bank Transfer Fields -->
+      <div id="bank_fields" class="hidden">
+        <label>Account Number:</label>
+        <input type="text" name="bank_account_number" />
+        <label>Name of Bank:</label>
+        <input type="text" name="bank_name" />
+        <label>Name of Account Holder:</label>
+        <input type="text" name="bank_holder_name" />
+        <label>IFSC Code:</label>
+        <input type="text" name="ifsc_code" />
+      </div>
 
       <button type="submit">Submit Order</button>
     </form>
 
     <div class="footer">
-      <p>Powered by P2Pforyou</p>
+      😊 Support | 💬 Live Chat (Coming Soon)
     </div>
   </div>
 
   <script>
-    function copyAddress() {
-      const copyText = document.getElementById("wallet_address");
-      navigator.clipboard.writeText(copyText.value).then(() => {
-        alert("Wallet address copied!");
-      }).catch(err => {
-        console.error('Failed to copy: ', err);
-      });
+    function updateAddress() {
+      const network = document.getElementById('network').value;
+      const addressInput = document.getElementById('usdt_address');
+      if (network === "TRC20") {
+        addressInput.value = "TUYMmZN5oTfyjDZ8zqbqsfepdbvBgoBDz3";
+      } else {
+        addressInput.value = "0x1A63d865D881E15D4103a5c031a67C0d63e9849C";
+      }
     }
-  </script>
 
+    function showFields() {
+      const mode = document.getElementById('payment_mode').value;
+      document.getElementById('upi_fields').classList.add('hidden');
+      document.getElementById('cdm_fields').classList.add('hidden');
+      document.getElementById('bank_fields').classList.add('hidden');
+
+      if (mode === "UPI") {
+        document.getElementById('upi_fields').classList.remove('hidden');
+      } else if (mode === "CDM") {
+        document.getElementById('cdm_fields').classList.remove('hidden');
+      } else if (mode === "Bank") {
+        document.getElementById('bank_fields').classList.remove('hidden');
+      }
+    }
+
+    function copyAddress() {
+      const copyText = document.getElementById("usdt_address");
+      navigator.clipboard?.writeText(copyText.value)
+        .then(() => alert("Copied USDT address!"))
+        .catch(() => {
+          copyText.select();
+          copyText.setSelectionRange(0, 99999);
+          document.execCommand("copy");
+          alert("Copied USDT address!");
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const usdtInput = document.getElementById("usdt");
+      const rateDisplay = document.getElementById("rateDisplay");
+      const inrDisplay = document.getElementById("inrDisplay");
+
+      usdtInput.addEventListener("input", () => {
+        let amount = parseFloat(usdtInput.value);
+        if (amount > 500) amount = 500;
+
+        let rate = 0;
+        if (amount >= 1.2 && amount <= 10) rate = 83;
+        else if (amount > 10 && amount <= 30.99) rate = 84;
+        else if (amount > 30.99 && amount <= 100.99) rate = 85.2;
+        else if (amount > 100.99 && amount <= 380.9) rate = 86;
+        else if (amount > 380.9 && amount <= 500) rate = 86.6;
+
+        if (rate === 0 || isNaN(amount)) {
+          rateDisplay.textContent = "Please enter a valid USDT amount.";
+          inrDisplay.textContent = "";
+        } else {
+          rateDisplay.textContent = `Rate per USDT: ₹${rate}`;
+          inrDisplay.textContent = `You will receive: ₹${(amount * rate).toFixed(2)}`;
+        }
+      });
+    });
+  </script>
 </body>
 </html>
