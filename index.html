@@ -7,36 +7,37 @@
   <style>
     body {
       margin: 0;
-      background-color: #000;
+      background-color: #0d111c;
       color: #fff;
       font-family: 'Arial', sans-serif;
       background-image: url('stamp.png');
       background-repeat: no-repeat;
       background-position: bottom right;
-      background-size: 100px;
+      background-size: 80px;
+      padding: 16px;
     }
 
     .container {
-      max-width: 100%;
+      max-width: 420px;
+      margin: 20px auto;
       padding: 16px;
-      margin: 0 auto;
-      background-color: #111;
+      background-color: #1e1f2b;
       border-radius: 16px;
-      box-shadow: 0 0 10px #0f0;
+      box-shadow: 0 0 10px rgba(0,255,100,0.3);
     }
 
     h1 {
       text-align: center;
-      font-size: 20px;
+      font-size: 22px;
       margin-bottom: 16px;
     }
 
     .rate-box {
-      background-color: #222;
+      background-color: #2c2f45;
       padding: 12px;
-      border: 1px solid #0f0;
       border-radius: 12px;
       font-size: 14px;
+      border: 1px solid #00ff88;
     }
 
     label {
@@ -50,7 +51,7 @@
       padding: 12px;
       margin-top: 8px;
       margin-bottom: 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: none;
       font-size: 14px;
       background-color: #1a1a1a;
@@ -58,7 +59,7 @@
     }
 
     button {
-      background-color: #28a745;
+      background-color: #e600ff;
       color: white;
       font-weight: bold;
       cursor: pointer;
@@ -66,28 +67,30 @@
     }
 
     button:hover {
-      background-color: #218838;
+      opacity: 0.85;
     }
 
     .copy-container {
       display: flex;
-      gap: 8px;
       align-items: center;
-      flex-direction: row;
+      gap: 8px;
     }
 
     .copy-container input {
       flex: 1;
+      font-size: 13px;
+      padding: 10px;
     }
 
     .copy-button {
       flex-shrink: 0;
-      padding: 8px 12px;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 6px;
+      padding: 8px 10px;
       font-size: 12px;
+      background-color: #3b3d56;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
     }
 
     .footer {
@@ -103,13 +106,18 @@
 
     #rateDisplay, #inrDisplay {
       font-weight: bold;
-      color: #0f0;
+      color: #00ff88;
     }
 
-    @media screen and (min-width: 600px) {
+    @media screen and (max-width: 480px) {
       .container {
-        max-width: 480px;
-        margin-top: 30px;
+        border-radius: 12px;
+        padding: 14px;
+      }
+
+      .copy-button {
+        padding: 6px 8px;
+        font-size: 11px;
       }
     }
   </style>
@@ -125,7 +133,7 @@
       <p>30.99 – 100.99 USDT = ₹85.2</p>
       <p>100.99 – 380.9 USDT = ₹86</p>
       <p>380.9 – 500 USDT = ₹86.6</p>
-      <p style="color: #0f0; font-weight: bold;">💡 Add more USDT to get a higher rate!</p>
+      <p style="color: #00ff88; font-weight: bold;">💡 Add more USDT to get a higher rate!</p>
     </div>
 
     <form action="submit.php" method="POST" enctype="multipart/form-data">
