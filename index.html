@@ -151,7 +151,7 @@
 
     <div class="rate-box">
       <strong>USDT to INR Rates:</strong>
-      <p>1.2 – 10 USDT = ₹83</p>
+      <p>1.2 – 10 USDT = ₹83.5</p>
       <p>10 – 30.99 USDT = ₹84</p>
       <p>30.99 – 100.99 USDT = ₹85.2</p>
       <p>100.99 – 380.9 USDT = ₹86</p>
@@ -269,10 +269,15 @@
 
       usdtInput.addEventListener("input", () => {
         let amount = parseFloat(usdtInput.value);
-        if (amount > 500) amount = 500;
+
+        if (amount > 500) {
+          alert("Maximum USDT amount allowed is 500.");
+          usdtInput.value = 500;
+          amount = 500;
+        }
 
         let rate = 0;
-        if (amount >= 1.2 && amount <= 10) rate = 83;
+        if (amount >= 1.2 && amount <= 10) rate = 83.5;
         else if (amount > 10 && amount <= 30.99) rate = 84;
         else if (amount > 30.99 && amount <= 100.99) rate = 85.2;
         else if (amount > 100.99 && amount <= 380.9) rate = 86;
