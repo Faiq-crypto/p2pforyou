@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Waiting for Payment</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    .status {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .timer {
+      font-size: 48px;
+      color: #00ff00;
+      margin-bottom: 30px;
+    }
+
+    .rating {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .rating input[type="radio"] {
+      display: none;
+    }
+
+    .rating label {
+      font-size: 40px;
+      color: #777;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .rating input[type="radio"]:checked ~ label,
+    .rating label:hover,
+    .rating label:hover ~ label {
+      color: gold;
+    }
+
+    #thankYou {
+      font-size: 20px;
+      margin-top: 20px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status" id="statusText">Merchant is making your payment...</div>
+  <div class="timer" id="countdown">05:00</div>
+
+  <div class="rating" id="ratingSection">
+    <p>Rate your experience:</p>
+    <form id="ratingForm">
+      <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
+      <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
+      <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
+      <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
+      <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
+    </form>
+    <div id="thankYou">Thank you for your feedback!</div>
+  </div>
+
+  <script>
+    // Countdown logic
+    let countdown = 300;
+    const countdownDisplay = document.getElementById("countdown");
+
+    const timerInterval = setInterval(() => {
+      const minutes = Math.floor(countdown / 60);
+      const seconds = countdown % 60;
+      countdownDisplay.textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      if (countdown <= 0) clearInterval(timerInterval);
+      countdown--;
+    }, 1000);
+
+    // Periodic status check
+    const statusText = document.getElementById("statusText");
+    const ratingSection = document.getElementById("ratingSection");
+
+    // Replace this with your actual Google Apps Script web app URL
+    const checkStatusURL = "https://script.google.com/macros/s/AKfycbw_8v9SoOuBcR8pA3AV1OtTKCUb4bqBAND0hRPfXdZzIaIhX4KuS4dWofCHaiTVspcUIQ/exec";
+
+    // Assuming order ID is passed via query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get("order_id");
+
+    async function checkStatus() {
+      try {
+        const res = await fetch(`${checkStatusURL}?order_id=${orderId}`);
+        const data = await res.json();
+        if (data.status === "Completed") {
+          statusText.textContent = "✅ Order has been completed!";
+          ratingSection.style.display = "block";
+          clearInterval(statusInterval);
+        }
+      } catch (error) {
+        console.error("Status check failed:", error);
+      }
+    }
+
+    const statusInterval = setInterval(checkStatus, 5000);
+
+    // Rating logic
+    document.getElementById("ratingForm").addEventListener("change", () => {
+      document.getElementById("thankYou").style.display = "block";
+    });
+  </script>
+</body>
+</html>
