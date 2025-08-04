@@ -6,7 +6,7 @@
   <title>P2Pforyou - Sell USDT</title>
   <style>
     :root {
-      --bg-color: #0d111c;
+      --bg-gradient: linear-gradient(120deg, #0d111c 0%, #1c2330 40%, #0d111c 100%);
       --container-bg: #1e1f2b;
       --accent: #00ff88;
       --button-bg: #e600ff;
@@ -16,7 +16,7 @@
 
     body {
       margin: 0;
-      background-color: var(--bg-color);
+      background: var(--bg-gradient);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: var(--text-light);
       padding: 16px;
@@ -68,6 +68,12 @@
       font-size: 14px;
     }
 
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
     button[type="submit"] {
       background-color: var(--button-bg);
       color: white;
@@ -99,7 +105,7 @@
     }
 
     .copy-button {
-      padding: 10px 12px;
+      padding: 10px;
       font-size: 13px;
       background-color: #3b3d56;
       border: none;
@@ -140,7 +146,7 @@
       }
 
       .copy-button {
-        padding: 8px 10px;
+        padding: 8px;
         font-size: 12px;
       }
     }
@@ -175,7 +181,7 @@
 
       <label>Send USDT to This Wallet Address:</label>
       <div class="copy-container">
-        <input type="text" id="usdt_address" name="usdt_address" value="0x1A63d865D881E15D4103a5c031a67C0d63e9849C" readonly />
+        <input type="text" id="usdt_address" readonly value="0x1A63d865D881E15D4103a5c031a67C0d63e9849C" />
         <button type="button" class="copy-button" onclick="copyAddress()">📋</button>
       </div>
 
@@ -187,7 +193,6 @@
         <option value="Bank">Bank Transfer</option>
       </select>
 
-      <!-- UPI Fields -->
       <div id="upi_fields" class="hidden">
         <label>Enter Your UPI ID:</label>
         <input type="text" name="upi_id" placeholder="yourupi@bank" />
@@ -195,7 +200,6 @@
         <input type="file" name="scanner" accept=".png" />
       </div>
 
-      <!-- CDM Fields -->
       <div id="cdm_fields" class="hidden">
         <label>Account Number:</label>
         <input type="text" name="cdm_account_number" />
@@ -205,7 +209,6 @@
         <input type="text" name="cdm_holder_name" />
       </div>
 
-      <!-- Bank Transfer Fields -->
       <div id="bank_fields" class="hidden">
         <label>Account Number:</label>
         <input type="text" name="bank_account_number" />
@@ -229,38 +232,32 @@
     function updateAddress() {
       const network = document.getElementById('network').value;
       const addressInput = document.getElementById('usdt_address');
-      if (network === "TRC20") {
-        addressInput.value = "TUYMmZN5oTfyjDZ8zqbqsfepdbvBgoBDz3";
-      } else {
-        addressInput.value = "0x1A63d865D881E15D4103a5c031a67C0d63e9849C";
-      }
+      addressInput.value = (network === "TRC20")
+        ? "TUYMmZN5oTfyjDZ8zqbqsfepdbvBgoBDz3"
+        : "0x1A63d865D881E15D4103a5c031a67C0d63e9849C";
     }
 
     function showFields() {
-      const mode = document.getElementById('payment_mode').value;
       document.getElementById('upi_fields').classList.add('hidden');
       document.getElementById('cdm_fields').classList.add('hidden');
       document.getElementById('bank_fields').classList.add('hidden');
 
-      if (mode === "UPI") {
-        document.getElementById('upi_fields').classList.remove('hidden');
-      } else if (mode === "CDM") {
-        document.getElementById('cdm_fields').classList.remove('hidden');
-      } else if (mode === "Bank") {
-        document.getElementById('bank_fields').classList.remove('hidden');
-      }
+      const mode = document.getElementById('payment_mode').value;
+      if (mode === "UPI") document.getElementById('upi_fields').classList.remove('hidden');
+      else if (mode === "CDM") document.getElementById('cdm_fields').classList.remove('hidden');
+      else if (mode === "Bank") document.getElementById('bank_fields').classList.remove('hidden');
     }
 
     function copyAddress() {
       const copyText = document.getElementById("usdt_address");
-      navigator.clipboard?.writeText(copyText.value)
-        .then(() => alert("Copied USDT address!"))
-        .catch(() => {
-          copyText.select();
-          copyText.setSelectionRange(0, 99999);
-          document.execCommand("copy");
-          alert("Copied USDT address!");
-        });
+      const tempInput = document.createElement("input");
+      document.body.appendChild(tempInput);
+      tempInput.value = copyText.value;
+      tempInput.select();
+      tempInput.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      alert("Copied USDT address!");
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -270,7 +267,10 @@
 
       usdtInput.addEventListener("input", () => {
         let amount = parseFloat(usdtInput.value);
-        if (amount > 500) amount = 500;
+        if (amount > 500) {
+          amount = 500;
+          usdtInput.value = 500;
+        }
 
         let rate = 0;
         if (amount >= 1.2 && amount <= 10) rate = 83;
