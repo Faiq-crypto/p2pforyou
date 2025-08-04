@@ -121,6 +121,7 @@
       <p>100.99 – 380.9 USDT = ₹86</p>
       <p>380.9 – 500 USDT = ₹86.6</p>
     </div>
+
     <form id="orderForm" enctype="multipart/form-data">
       <label>Select USDT Network:</label>
       <select name="network" id="network" required onchange="updateAddress()">
@@ -205,10 +206,9 @@
 
     function updateAddress() {
       const network = document.getElementById('network').value;
-      const addressInput = document.getElementById('usdt_address');
-      addressInput.value = network === "TRC20"
-        ? "TUYMmZN5oTfyjDZ8zqbqsfepdbvBgoBDz3"
-        : "0x1A63d865D881E15D4103a5c031a67C0d63e9849C";
+      document.getElementById('usdt_address').value =
+        network === "TRC20" ? "TUYMmZN5oTfyjDZ8zqbqsfepdbvBgoBDz3"
+                            : "0x1A63d865D881E15D4103a5c031a67C0d63e9849C";
     }
 
     function showFields() {
@@ -223,13 +223,13 @@
 
     function copyAddress() {
       const copyText = document.getElementById("usdt_address");
-      navigator.clipboard.writeText(copyText.value).then(() => {
-        alert("Copied USDT address!");
-      }).catch(() => {
-        copyText.select();
-        document.execCommand("copy");
-        alert("Copied USDT address!");
-      });
+      navigator.clipboard.writeText(copyText.value)
+        .then(() => alert("Copied USDT address!"))
+        .catch(() => {
+          copyText.select();
+          document.execCommand("copy");
+          alert("Copied USDT address!");
+        });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
