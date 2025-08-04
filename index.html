@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>P2Pforyou - Sell USDT</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      background-image: url('stamp.png');
+      background-repeat: no-repeat;
+      background-position: bottom right;
+      background-size: 150px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      background-color: #111;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #0f0;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    .hidden {
+      display: none;
+    }
+    #rateDisplay, #inrDisplay {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #0f0;
+    }
+    .copy-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .copy-button {
+      width: auto;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+    }
+    .rate-box {
+      margin-top: 20px;
+      background-color: #222;
+      padding: 12px;
+      border: 1px solid #0f0;
+      border-radius: 8px;
+    }
+    .rate-box p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>P2Pforyou - Sell USDT</h1>
+
+    <div class="rate-box">
+      <strong>USDT to INR Rates:</strong>
+      <p>1.2 – 10 USDT = ₹83</p>
+      <p>10 – 30.99 USDT = ₹84</p>
+      <p>30.99 – 100.99 USDT = ₹85.2</p>
+      <p>100.99 – 380.9 USDT = ₹86</p>
+      <p>380.9 – 500 USDT = ₹86.6</p>
+      <p style="color: #0f0; font-weight: bold;">💡 Add more USDT to get a higher rate!</p>
+    </div>
+
+    <form action="submit.php" method="POST" enctype="multipart/form-data">
+      
+      <label>Select USDT Network:</label>
+      <select name="network" id="network" required onchange="updateAddress()">
+        <option value="BEP20">USDT BEP20</option>
+        <option value="Polygon">USDT Polygon</option>
+        <option value="TRC20">USDT TRC20</option>
+      </select>
+
+      <label>Enter USDT Amount (1.2 - 500):</label>
+      <input type="number" id="usdt" name="usdt_amount" min="1.2" max="500" step="0.01" required>
+      <p id="rateDisplay"></p>
+      <p id="inrDisplay"></p>
+
+      <label>Send USDT to This Wallet Address:</label>
+      <div class="copy-container">
+        <input type="text" id="usdt_address" name="usdt_address" value="0x1A63d865D881E15D4103a5c031a67C0d63e9849C" readonly>
+        <button type="button" class="copy-button" onclick="copyAddress()">Copy</button>
+      </div>
+
+      <label>Choose Payment Receiving Mode:</label>
+      <select name="payment_mode" id="payment_mode" required onchange="showFields()">
+        <option value="">-- Select Payment Mode --</option>
+        <option value="UPI">UPI</option>
+        <option value="CDM">CDM</option>
+        <option value="Bank">Bank Transfer</option>
+      </select>
+
+      <!-- UPI Fields -->
+      <div id="upi_fields" class="hidden">
+        <label>Enter Your UPI ID:</label>
+        <input type="text" name="upi_id" placeholder="yourupi@bank">
+
+        <label>Upload Scanner File (PNG only):</label>
+        <input type="file" name="scanner" accept=".png">
+      </div>
+
+      <!-- CDM Fields -->
+      <div id="cdm_fields" class="hidden">
+        <label>Account Number:</label>
+        <input type="text" name="cdm_account_number">
+
+        <label>Name of Bank:</label>
+        <input type="text" name="cdm_bank_name">
+
+        <label>Name of Account Holder:</label>
+        <input type="text" name="cdm_holder_name">
+      </div>
+
+      <!-- Bank Transfer Fields -->
+      <div id="bank_fields" class="hidden">
+        <label>Account Number:</label>
+        <input type="text" name="bank_account_number">
+
+        <label>Name of Bank:</label>
+        <input type="text" name="bank_name">
+
+        <label>Name of Account Holder:</label>
+        <input type="text" name="bank_holder_name">
+
+        <label>IFSC Code:</label>
+        <input type="text" name="ifsc_code">
+      </div>
+
+      <button type="submit">Submit Order</button>
+    </form>
+
+    <div class="footer">
+      <p>😊 Support | 💬 Live Chat (Coming Soon)</p>
+    </div>
+  </div>
+
+  <script>
+    function updateAddress() {
+      const network = document.getElementById('network').value;
+      const addressInput = document.getElementById('usdt_address');
+      if (network === "TRC20") {
+        addressInput.value = "TUYMmZN5oTfyjDZ8zqbqsfepdbvBgoBDz3";
+      } else {
+        addressInput.value = "0x1A63d865D881E15D4103a5c031a67C0d63e9849C";
+      }
+    }
+
+    function showFields() {
+      const mode = document.getElementById('payment_mode').value;
+      document.getElementById('upi_fields').classList.add('hidden');
+      document.getElementById('cdm_fields').classList.add('hidden');
+      document.getElementById('bank_fields').classList.add('hidden');
+
+      if (mode === "UPI") {
+        document.getElementById('upi_fields').classList.remove('hidden');
+      } else if (mode === "CDM") {
+        document.getElementById('cdm_fields').classList.remove('hidden');
+      } else if (mode === "Bank") {
+        document.getElementById('bank_fields').classList.remove('hidden');
+      }
+    }
+
+    function copyAddress() {
+      const copyText = document.getElementById("usdt_address");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); 
+      document.execCommand("copy");
+      alert("Copied USDT address!");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const usdtInput = document.getElementById("usdt");
+      const rateDisplay = document.getElementById("rateDisplay");
+      const inrDisplay = document.getElementById("inrDisplay");
+
+      usdtInput.addEventListener("input", function () {
+        let amount = parseFloat(usdtInput.value);
+        if (amount > 500) {
+          amount = 500;
+          usdtInput.value = 500;
+        }
+
+        let rate = 0;
+        if (amount >= 1.2 && amount <= 10) rate = 83;
+        else if (amount > 10 && amount <= 30.99) rate = 84;
+        else if (amount > 30.99 && amount <= 100.99) rate = 85.2;
+        else if (amount > 100.99 && amount <= 380.9) rate = 86;
+        else if (amount > 380.9 && amount <= 500) rate = 86.6;
+        else rate = 0;
+
+        if (rate === 0 || isNaN(amount)) {
+          rateDisplay.textContent = "Please enter a valid USDT amount.";
+          inrDisplay.textContent = "";
+        } else {
+          rateDisplay.textContent = `Rate per USDT: ₹${rate}`;
+          inrDisplay.textContent = `You will receive: ₹${(amount * rate).toFixed(2)}`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
