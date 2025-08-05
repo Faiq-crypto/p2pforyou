@@ -84,7 +84,7 @@
     const sheetCSVURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pub?output=csv";
     const updateURL = "https://script.google.com/macros/s/AKfycbxmz66XR7jVhkgxaww7SLkseJULBQ0QVTs_rQ-x22t1IItdZDOUcup4M0DIUYE63kdG/exec";
 
-    // Robust CSV parser that respects quoted commas
+    // Better CSV parser
     function parseCSV(csvText) {
       const rows = [];
       let currentRow = [], currentField = '', insideQuotes = false;
@@ -124,7 +124,7 @@
 
     async function fetchOrders() {
       try {
-        const res = await fetch(sheetCSVURL);
+        const res = await fetch(sheetCSVURL, { cache: "no-store" });
         const csvText = await res.text();
         const rows = parseCSV(csvText);
 
@@ -141,7 +141,7 @@
           });
 
           const status = row[8]?.toLowerCase();
-          const orderID = row[1];
+          const orderID = row[1]?.trim();
           const tdBtn = document.createElement("td");
 
           if (status === "completed") {
@@ -149,7 +149,7 @@
           } else {
             const btn = document.createElement("button");
             btn.textContent = "Mark Complete";
-            btn.onclick = () => markComplete(orderID, tr);
+            btn.onclick = () => markComplete(orderID, tr, btn);
             tdBtn.appendChild(btn);
           }
 
@@ -157,14 +157,17 @@
           tbody.appendChild(tr);
         });
       } catch (err) {
-        alert("❌ Failed to load order data. Make sure your Google Sheet is published correctly.");
+        alert("❌ Failed to load order data. Make sure your Google Sheet is published.");
         console.error(err);
       }
     }
 
-    async function markComplete(orderId, rowElement) {
+    async function markComplete(orderId, rowElement, button) {
       const confirmAction = confirm("Mark this order as Completed?");
       if (!confirmAction) return;
+
+      button.disabled = true;
+      button.textContent = "Processing...";
 
       try {
         const res = await fetch(updateURL, {
@@ -185,16 +188,20 @@
           rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
         } else {
           alert("❌ Failed to update: " + text);
+          button.disabled = false;
+          button.textContent = "Mark Complete";
         }
       } catch (e) {
         alert("❌ Network error while updating.");
+        button.disabled = false;
+        button.textContent = "Mark Complete";
         console.error(e);
       }
     }
 
     window.onload = () => {
       fetchOrders();
-      setInterval(fetchOrders, 10000); // auto-refresh every 10s
+      setInterval(fetchOrders, 15000); // Refresh every 15 seconds
     };
   </script>
 </body>
