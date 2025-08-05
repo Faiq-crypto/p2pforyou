@@ -12,40 +12,33 @@
       text-align: center;
       padding: 50px 20px;
     }
-
     .status {
       font-size: 24px;
       margin-bottom: 20px;
     }
-
     .timer {
       font-size: 48px;
       color: #00ff00;
       margin-bottom: 30px;
     }
-
     .rating {
       display: none;
       margin-top: 30px;
     }
-
     .rating input[type="radio"] {
       display: none;
     }
-
     .rating label {
       font-size: 40px;
       color: #777;
       cursor: pointer;
       transition: color 0.3s;
     }
-
     .rating input[type="radio"]:checked ~ label,
     .rating label:hover,
     .rating label:hover ~ label {
       color: gold;
     }
-
     #thankYou {
       font-size: 20px;
       margin-top: 20px;
@@ -55,7 +48,7 @@
 </head>
 <body>
 
-  <div class="status" id="statusText">Merchant is making your payment...</div>
+  <div class="status" id="statusText">⏳ Waiting for merchant to complete your order...</div>
   <div class="timer" id="countdown">05:00</div>
 
   <div class="rating" id="ratingSection">
@@ -71,6 +64,10 @@
   </div>
 
   <script>
+    // Get order ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get("orderId"); // FIXED: should be orderId, not order_id
+
     // Countdown logic
     let countdown = 300;
     const countdownDisplay = document.getElementById("countdown");
@@ -85,21 +82,18 @@
       countdown--;
     }, 1000);
 
-    // Periodic status check
+    // Status checking
     const statusText = document.getElementById("statusText");
     const ratingSection = document.getElementById("ratingSection");
 
-    // Replace this with your actual Google Apps Script web app URL
-    const checkStatusURL = "https://script.google.com/macros/s/AKfycbw_8v9SoOuBcR8pA3AV1OtTKCUb4bqBAND0hRPfXdZzIaIhX4KuS4dWofCHaiTVspcUIQ/exec";
-
-    // Assuming order ID is passed via query string
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get("order_id");
+    // ✅ Your actual Google Script URL
+    const checkStatusURL = "https://script.google.com/macros/s/AKfycbx2VXqs_V6Ec2yBfNKqcjpT74l76HBtgyNw9JEQkevMf_CDwjojEJqgrxwbINkhB-57tg/exec";
 
     async function checkStatus() {
       try {
         const res = await fetch(`${checkStatusURL}?order_id=${orderId}`);
         const data = await res.json();
+
         if (data.status === "Completed") {
           statusText.textContent = "✅ Order has been completed!";
           ratingSection.style.display = "block";
