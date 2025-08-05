@@ -1,13 +1,13 @@
 self.addEventListener("install", e => {
-  e.waitUntil(
-    caches.open("p2p-admin-cache").then(cache => {
-      return cache.addAll(["./admin.html", "./manifest.json"]);
-    })
-  );
+  console.log("✅ Service Worker installed");
+  e.waitUntil(self.skipWaiting());
+});
+
+self.addEventListener("activate", e => {
+  console.log("✅ Service Worker activated");
+  e.waitUntil(self.clients.claim());
 });
 
 self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
-  );
+  // Can add caching logic if needed
 });
