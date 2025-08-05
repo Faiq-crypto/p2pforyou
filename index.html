@@ -183,13 +183,17 @@
   </div>
 
   <script>
-
     const scriptURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
 
     document.getElementById("orderForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const form = e.target;
       const formData = new FormData(form);
+
+      // Prevent multiple clicks
+      const submitButton = form.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
+      submitButton.innerText = "Submitting...";
 
       fetch(scriptURL, {
         method: "POST",
@@ -202,6 +206,8 @@
       .catch(err => {
         console.error("Submission failed", err);
         alert("Something went wrong. Please try again.");
+        submitButton.disabled = false;
+        submitButton.innerText = "Submit Order";
       });
     });
 
