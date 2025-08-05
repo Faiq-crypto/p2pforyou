@@ -132,7 +132,11 @@
       }
     }
 
-    window.onload = loadOrders;
+    window.onload = () => {
+  fetchOrders();                  // Initial load
+  setInterval(fetchOrders, 10000); // Refresh every 10 seconds
+};
+
   </script>
 </body>
 </html>
