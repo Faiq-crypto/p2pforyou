@@ -6,90 +6,102 @@
   <title>Admin Panel - P2Pforyou</title>
   <style>
     body {
-      background-color: #0f0f0f;
-      font-family: 'Segoe UI', sans-serif;
+      background-color: #0d111c;
+      font-family: Arial, sans-serif;
       color: #fff;
       padding: 20px;
-      margin: 0;
+      overflow-x: auto;
     }
-    h1 {
-      text-align: center;
-      color: #cfcfcf;
-      margin-bottom: 20px;
-    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
-      background-color: #1a1a1a;
-      border-radius: 12px;
-      overflow: hidden;
+      margin-top: 20px;
+      font-size: 14px;
+      table-layout: fixed;
     }
+
     th, td {
-      border: 1px solid #333;
-      padding: 10px;
+      border: 1px solid #555;
+      padding: 8px;
       text-align: left;
       word-wrap: break-word;
       vertical-align: middle;
     }
+
     th {
-      background-color: #222;
-      color: #ffccff;
+      background-color: #1e1f2b;
     }
-    td {
-      background-color: #1e1e1e;
-    }
+
     button {
-      background-color: #8b5cf6;
+      background-color: #00ff88;
       border: none;
-      color: #fff;
-      padding: 8px 10px;
-      border-radius: 8px;
+      color: #000;
+      padding: 6px 12px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 14px;
-      transition: background 0.2s;
+      font-size: 13px;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
     }
+
     button:hover {
-      background-color: #7c3aed;
+      background-color: #00cc66;
     }
+
     .completed {
-      background-color: #22c55e;
+      background-color: #00cc66;
       color: white;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 14px;
+      padding: 6px 12px;
+      border-radius: 5px;
       text-align: center;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 13px;
     }
+
     td:last-child {
       text-align: center;
     }
-    @media screen and (max-width: 768px) {
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
       table, thead, tbody, th, td, tr {
         display: block;
       }
+
       thead {
         display: none;
       }
+
       tr {
         margin-bottom: 15px;
-        border: 1px solid #444;
-        border-radius: 10px;
+        border: 1px solid #333;
         padding: 10px;
-        background-color: #181818;
+        border-radius: 8px;
+        background-color: #1a1a1a;
       }
+
       td {
         padding: 8px;
-        text-align: right;
+        text-align: left;
         position: relative;
+        border: none;
+        border-bottom: 1px solid #333;
       }
+
       td::before {
         content: attr(data-label);
-        position: absolute;
-        left: 10px;
-        width: 50%;
-        text-align: left;
-        color: #aaa;
         font-weight: bold;
+        color: #aaa;
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      td:last-child {
+        text-align: left;
       }
     }
   </style>
@@ -148,6 +160,7 @@
           currentField += char;
         }
       }
+
       if (currentField || currentRow.length > 0) {
         currentRow.push(currentField);
         if (currentRow.some(cell => cell.trim() !== "")) {
@@ -167,16 +180,17 @@
         const tbody = document.querySelector("#ordersTable tbody");
         tbody.innerHTML = "";
 
+        const headers = rows[0];
+
         rows.slice(1).forEach(row => {
-          if (!row[1]) return; // Skip if Order ID is missing
+          if (!row[1] || row.every(cell => cell.trim() === "")) return;
 
           const tr = document.createElement("tr");
 
-          row.slice(0, 9).forEach((cell, i) => {
+          row.slice(0, 9).forEach((cell, index) => {
             const td = document.createElement("td");
-            td.setAttribute("data-label", rows[0][i]);
-            td.textContent = (i === 7) ? (cell || "N/A") : cell;
-            if (i === 7) td.style.fontSize = "15px"; // Bigger bank detail text
+            td.setAttribute("data-label", headers[index]);
+            td.textContent = cell;
             tr.appendChild(td);
           });
 
@@ -198,20 +212,24 @@
           tbody.appendChild(tr);
         });
       } catch (err) {
-        alert("❌ Failed to load order data.");
+        alert("❌ Failed to load order data. Make sure your Google Sheet is published.");
         console.error(err);
       }
     }
 
     async function markComplete(orderId, rowElement, button) {
-      if (!confirm("Mark this order as Completed?")) return;
+      const confirmAction = confirm("Mark this order as Completed?");
+      if (!confirmAction) return;
+
       button.disabled = true;
       button.textContent = "Processing...";
 
       try {
         const res = await fetch(updateURL, {
           method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
           body: new URLSearchParams({
             action: "updateStatus",
             order_id: orderId,
@@ -229,7 +247,7 @@
           button.textContent = "Mark Complete";
         }
       } catch (e) {
-        alert("❌ Network error.");
+        alert("❌ Network error while updating.");
         button.disabled = false;
         button.textContent = "Mark Complete";
         console.error(e);
