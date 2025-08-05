@@ -10,17 +10,21 @@
       font-family: Arial, sans-serif;
       color: #fff;
       padding: 20px;
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
       font-size: 14px;
+      table-layout: fixed;
     }
     th, td {
       border: 1px solid #555;
       padding: 8px;
       text-align: left;
+      word-wrap: break-word;
+      vertical-align: middle;
     }
     th {
       background-color: #1e1f2b;
@@ -29,9 +33,13 @@
       background-color: #00ff88;
       border: none;
       color: #000;
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 5px;
       cursor: pointer;
+      font-size: 13px;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
     }
     button:hover {
       background-color: #00cc66;
@@ -39,8 +47,16 @@
     .completed {
       background-color: #00cc66;
       color: white;
-      padding: 4px 8px;
+      padding: 6px 12px;
       border-radius: 5px;
+      text-align: center;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 13px;
+    }
+    td:last-child {
+      text-align: center;
     }
   </style>
 </head>
@@ -116,20 +132,21 @@
         const res = await fetch(updateURL, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/x-www-form-urlencoded"
           },
-          body: JSON.stringify({
-            orderId: orderId, // ✅ Correct key name
+          body: new URLSearchParams({
+            action: "updateStatus",
+            order_id: orderId,
             status: "Completed"
           })
         });
 
-        const result = await res.json();
-        if (result.success) {
+        const text = await res.text();
+        if (text.includes("Success")) {
           rowElement.cells[8].textContent = "Completed";
           rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
         } else {
-          alert("❌ Failed to update: " + (result.error || "Unknown error"));
+          alert("❌ Failed to update: " + text);
         }
       } catch (e) {
         alert("❌ Network error while updating.");
@@ -139,7 +156,7 @@
 
     window.onload = () => {
       fetchOrders();
-      setInterval(fetchOrders, 10000); // auto-refresh every 10s
+      setInterval(fetchOrders, 10000);
     };
   </script>
 </body>
