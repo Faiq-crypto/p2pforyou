@@ -55,17 +55,28 @@
       display: none;
     }
 
+    .rating .stars {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
     .rating label {
       font-size: 40px;
       color: #555;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: transform 0.3s, color 0.3s;
       filter: drop-shadow(0 0 2px rgba(255,255,255,0.2));
     }
 
-    .rating input[type="radio"]:checked ~ label,
     .rating label:hover,
     .rating label:hover ~ label {
+      color: #ffd700;
+      text-shadow: 0 0 5px #ffd700aa;
+      transform: scale(1.1);
+    }
+
+    .rating input:checked ~ label {
       color: #ffd700;
       text-shadow: 0 0 5px #ffd700aa;
     }
@@ -105,17 +116,17 @@
 </head>
 <body>
 
-  <div class="status" id="statusText">😊 Merchant is processing your order...</div>
+  <div class="status" id="statusText">📦 Order has been sent. It is being processed by the merchant. Please wait...</div>
   <div class="timer" id="countdown">10:00</div>
 
   <div class="rating" id="ratingSection">
     <p>Please rate our service:</p>
-    <form id="ratingForm">
-      <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
-      <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
-      <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
-      <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
+    <form id="ratingForm" class="stars">
       <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
+      <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
+      <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
+      <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
+      <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
     </form>
     <div id="thankYou">✨ Thank you for your feedback!</div>
   </div>
@@ -124,23 +135,40 @@
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get("orderId");
 
-    let countdown = 600; // 10 minutes
     const countdownDisplay = document.getElementById("countdown");
-
-    const timerInterval = setInterval(() => {
-      const minutes = Math.floor(countdown / 60);
-      const seconds = countdown % 60;
-      countdownDisplay.textContent =
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-      if (countdown <= 0) clearInterval(timerInterval);
-      countdown--;
-    }, 1000);
-
     const statusText = document.getElementById("statusText");
     const ratingSection = document.getElementById("ratingSection");
     const checkStatusURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
 
+    // Persistent timer using localStorage
+    const storageKey = `countdown_${orderId}`;
+    const startTime = Date.now();
+    const tenMinutes = 10 * 60 * 1000;
+
+    let saved = localStorage.getItem(storageKey);
+    let countdownEnd = saved ? parseInt(saved) : startTime + tenMinutes;
+
+    if (!saved) localStorage.setItem(storageKey, countdownEnd);
+
+    function updateCountdown() {
+      let now = Date.now();
+      let timeLeft = Math.max(0, Math.floor((countdownEnd - now) / 1000));
+      let minutes = Math.floor(timeLeft / 60);
+      let seconds = timeLeft % 60;
+      countdownDisplay.textContent =
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    const timerInterval = setInterval(() => {
+      updateCountdown();
+      if (Date.now() >= countdownEnd) {
+        clearInterval(timerInterval);
+      }
+    }, 1000);
+
+    updateCountdown(); // initial call
+
+    // Order status check
     async function checkStatus() {
       try {
         const res = await fetch(`${checkStatusURL}?order_id=${orderId}`);
@@ -148,10 +176,10 @@
 
         if (data.status === "Completed") {
           statusText.textContent = "✅ Order has been completed!";
-          countdown = 0;
           countdownDisplay.textContent = "00:00";
           ratingSection.style.display = "block";
           clearInterval(statusInterval);
+          clearInterval(timerInterval);
         }
       } catch (error) {
         console.error("Status check failed:", error);
