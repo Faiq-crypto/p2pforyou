@@ -66,9 +66,9 @@
 
   <script>
     const sheetCSVURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pub?output=csv";
-    const updateURL = "https://script.google.com/macros/s/AKfycbzRvZW8AU3-Dm034ZlRyHSYD7ypDtv2AIrcZPbwKTrwxNS9ItX5BlTZwwLk-3se8JxD/exec";
+    const updateURL = "https://script.google.com/macros/s/AKfycbyGzR6-cWA4lKSkk3vCHysgLdo39PJdLfmFevH3Ww8tYC73DPWgpNPsnPx3SrMhxFRC/exec";
 
-    async function loadOrders() {
+    async function fetchOrders() {
       try {
         const res = await fetch(sheetCSVURL);
         const csvText = await res.text();
@@ -115,28 +115,33 @@
       try {
         const res = await fetch(updateURL, {
           method: "POST",
-          body: JSON.stringify({ order_id: orderId, status: "Completed" }),
           headers: {
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams({
+            action: "updateStatus",
+            order_id: orderId,
+            status: "Completed"
+          })
         });
 
-        if (res.ok) {
+        const text = await res.text();
+        if (text.includes("Success")) {
           rowElement.cells[8].textContent = "Completed";
           rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
         } else {
-          alert("❌ Failed to update status. Try again.");
+          alert("❌ Failed to update: " + text);
         }
       } catch (e) {
         alert("❌ Network error while updating.");
+        console.error(e);
       }
     }
 
     window.onload = () => {
-  fetchOrders();                  // Initial load
-  setInterval(fetchOrders, 10000); // Refresh every 10 seconds
-};
-
+      fetchOrders();
+      setInterval(fetchOrders, 10000); // auto-refresh every 10s
+    };
   </script>
 </body>
 </html>
