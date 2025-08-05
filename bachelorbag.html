@@ -101,7 +101,7 @@
       const input = prompt("Enter admin password:");
       if (input !== correctPassword) {
         alert("❌ Access Denied!");
-        window.location.href = "/"; // Redirect to homepage or error page
+        window.location.href = "/";
       } else {
         localStorage.setItem("p2p_admin", "true");
       }
@@ -131,6 +131,8 @@
   <script>
     const sheetCSVURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pub?output=csv";
     const updateURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
+
+    const localStatusMap = {};
 
     function parseCSV(csvText) {
       const rows = [];
@@ -184,10 +186,17 @@
 
         const headers = rows[0];
 
-        rows.slice(1).forEach(row => {
+        [...rows.slice(1)].reverse().forEach(row => {
           if (!row[1] || row.every(cell => cell.trim() === "")) return;
 
           const tr = document.createElement("tr");
+          const orderID = row[1]?.trim();
+          let status = row[8]?.toLowerCase();
+
+          // Use local status if exists
+          if (localStatusMap[orderID]) {
+            status = localStatusMap[orderID];
+          }
 
           row.slice(0, 9).forEach((cell, index) => {
             const td = document.createElement("td");
@@ -196,8 +205,6 @@
             tr.appendChild(td);
           });
 
-          const status = row[8]?.toLowerCase();
-          const orderID = row[1]?.trim();
           const tdBtn = document.createElement("td");
           tdBtn.setAttribute("data-label", "Mark Complete");
 
@@ -241,6 +248,7 @@
 
         const text = await res.text();
         if (text.includes("Success")) {
+          localStatusMap[orderId] = "completed"; // store locally
           rowElement.cells[8].textContent = "Completed";
           rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
         } else {
