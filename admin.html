@@ -37,7 +37,6 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 13px;
-      display: inline-block;
       width: 100%;
       box-sizing: border-box;
     }
@@ -50,7 +49,6 @@
       padding: 6px 12px;
       border-radius: 5px;
       text-align: center;
-      display: inline-block;
       width: 100%;
       box-sizing: border-box;
       font-size: 13px;
@@ -75,8 +73,6 @@
       td {
         padding: 8px;
         text-align: left;
-        position: relative;
-        border: none;
         border-bottom: 1px solid #333;
       }
       td::before {
@@ -86,15 +82,12 @@
         display: block;
         margin-bottom: 5px;
       }
-      td:last-child {
-        text-align: left;
-      }
     }
   </style>
 
-  <!-- 🔐 Login Protection -->
+  <!-- 🔐 Admin Password -->
   <script>
-    const correctPassword = "FTXPENGUJUP@"; // Change this if needed
+    const correctPassword = "FTXPENGUJUP@";
     const isLoggedIn = localStorage.getItem("p2p_admin");
 
     if (isLoggedIn !== "true") {
@@ -133,51 +126,60 @@
     const updateURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
 
     const localStatusMap = {};
-    let lastFetchedOrders = [];
+    let lastOrderIDs = new Set();
+
+    function requestNotificationPermission() {
+      if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission !== "granted") {
+            console.warn("Notifications are disabled.");
+          }
+        });
+      }
+    }
+
+    function sendNotification(message) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("🔔 A NEW ORDER HAS ARRIVED!!", {
+          body: message,
+          icon: "https://cdn-icons-png.flaticon.com/512/1996/1996045.png"
+        });
+      }
+    }
 
     function parseCSV(csvText) {
       const rows = [];
-      let currentRow = [], currentField = '', insideQuotes = false;
+      let insideQuotes = false, field = '', row = [];
 
       for (let i = 0; i < csvText.length; i++) {
-        const char = csvText[i];
-        const nextChar = csvText[i + 1];
-
-        if (char === '"' && insideQuotes && nextChar === '"') {
-          currentField += '"';
+        const char = csvText[i], next = csvText[i + 1];
+        if (char === '"' && next === '"' && insideQuotes) {
+          field += '"';
           i++;
         } else if (char === '"') {
           insideQuotes = !insideQuotes;
         } else if (char === ',' && !insideQuotes) {
-          currentRow.push(currentField);
-          currentField = '';
+          row.push(field);
+          field = '';
         } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-          if (currentField || currentRow.length > 0) {
-            currentRow.push(currentField);
-            if (currentRow.some(cell => cell.trim() !== "")) {
-              rows.push(currentRow);
-            }
-            currentRow = [];
-            currentField = '';
+          if (field || row.length) {
+            row.push(field);
+            if (row.some(cell => cell.trim())) rows.push(row);
+            row = [];
+            field = '';
           }
-          if (char === '\r' && nextChar === '\n') i++;
+          if (char === '\r' && next === '\n') i++;
         } else {
-          currentField += char;
+          field += char;
         }
       }
 
-      if (currentField || currentRow.length > 0) {
-        currentRow.push(currentField);
-        if (currentRow.some(cell => cell.trim() !== "")) {
-          rows.push(currentRow);
-        }
+      if (field || row.length) {
+        row.push(field);
+        if (row.some(cell => cell.trim())) rows.push(row);
       }
 
       return rows;
-    }
-
-    function isSameData(newData, oldData) {
-      return JSON.stringify(newData) === JSON.stringify(oldData);
     }
 
     async function fetchOrders() {
@@ -186,10 +188,16 @@
         const csvText = await res.text();
         const rows = parseCSV(csvText);
         const headers = rows[0];
-        const dataRows = rows.slice(1).filter(r => r[1] && r.some(cell => cell.trim() !== ""));
+        const dataRows = rows.slice(1).filter(r => r[1]?.trim());
 
-        if (isSameData(dataRows, lastFetchedOrders)) return;
-        lastFetchedOrders = dataRows;
+        const currentOrderIDs = new Set(dataRows.map(r => r[1]?.trim()));
+        const newOrders = [...currentOrderIDs].filter(id => !lastOrderIDs.has(id));
+
+        if (newOrders.length > 0) {
+          sendNotification(`${newOrders.length} new order(s) received.`);
+        }
+
+        lastOrderIDs = currentOrderIDs;
 
         const tbody = document.querySelector("#ordersTable tbody");
         tbody.innerHTML = "";
@@ -225,15 +233,14 @@
           tr.appendChild(tdBtn);
           tbody.appendChild(tr);
         });
+
       } catch (err) {
         console.error("Fetch error:", err);
-        // Don’t clear table if fetch fails
       }
     }
 
     async function markComplete(orderId, rowElement, button) {
-      const confirmAction = confirm("Mark this order as Completed?");
-      if (!confirmAction) return;
+      if (!confirm("Mark this order as Completed?")) return;
 
       button.disabled = true;
       button.textContent = "Processing...";
@@ -241,9 +248,7 @@
       try {
         const res = await fetch(updateURL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             action: "updateStatus",
             order_id: orderId,
@@ -263,16 +268,17 @@
         }
       } catch (e) {
         alert("❌ Network error.");
+        console.error(e);
         button.disabled = false;
         button.textContent = "Mark Complete";
-        console.error(e);
       }
     }
 
     window.onload = () => {
+      requestNotificationPermission();
       fetchOrders();
-      setInterval(fetchOrders, 15000); // 15 sec auto-refresh
+      setInterval(fetchOrders, 15000); // refresh every 15 sec
     };
   </script>
 </body>
-</html>   
+</html>
