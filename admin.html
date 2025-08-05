@@ -6,57 +6,91 @@
   <title>Admin Panel - P2Pforyou</title>
   <style>
     body {
-      background-color: #0d111c;
-      font-family: Arial, sans-serif;
+      background-color: #0f0f0f;
+      font-family: 'Segoe UI', sans-serif;
       color: #fff;
       padding: 20px;
-      overflow-x: auto;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #cfcfcf;
+      margin-bottom: 20px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 14px;
-      table-layout: fixed;
+      font-size: 13px;
+      background-color: #1a1a1a;
+      border-radius: 12px;
+      overflow: hidden;
     }
     th, td {
-      border: 1px solid #555;
-      padding: 8px;
+      border: 1px solid #333;
+      padding: 10px;
       text-align: left;
       word-wrap: break-word;
       vertical-align: middle;
     }
     th {
-      background-color: #1e1f2b;
+      background-color: #222;
+      color: #ffccff;
+    }
+    td {
+      background-color: #1e1e1e;
     }
     button {
-      background-color: #00ff88;
+      background-color: #8b5cf6;
       border: none;
-      color: #000;
-      padding: 6px 12px;
-      border-radius: 5px;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 13px;
-      display: inline-block;
-      width: 100%;
-      box-sizing: border-box;
+      font-size: 14px;
+      transition: background 0.2s;
     }
     button:hover {
-      background-color: #00cc66;
+      background-color: #7c3aed;
     }
     .completed {
-      background-color: #00cc66;
+      background-color: #22c55e;
       color: white;
-      padding: 6px 12px;
-      border-radius: 5px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 14px;
       text-align: center;
-      display: inline-block;
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 13px;
     }
     td:last-child {
       text-align: center;
+    }
+    @media screen and (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #444;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #181818;
+      }
+      td {
+        padding: 8px;
+        text-align: right;
+        position: relative;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 50%;
+        text-align: left;
+        color: #aaa;
+        font-weight: bold;
+      }
     }
   </style>
 </head>
@@ -84,7 +118,6 @@
     const sheetCSVURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pub?output=csv";
     const updateURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
 
-    // Better CSV parser
     function parseCSV(csvText) {
       const rows = [];
       let currentRow = [], currentField = '', insideQuotes = false;
@@ -104,19 +137,22 @@
         } else if ((char === '\n' || char === '\r') && !insideQuotes) {
           if (currentField || currentRow.length > 0) {
             currentRow.push(currentField);
-            rows.push(currentRow);
+            if (currentRow.some(cell => cell.trim() !== "")) {
+              rows.push(currentRow);
+            }
             currentRow = [];
             currentField = '';
           }
-          if (char === '\r' && nextChar === '\n') i++; // Skip \n after \r
+          if (char === '\r' && nextChar === '\n') i++;
         } else {
           currentField += char;
         }
       }
-
       if (currentField || currentRow.length > 0) {
         currentRow.push(currentField);
-        rows.push(currentRow);
+        if (currentRow.some(cell => cell.trim() !== "")) {
+          rows.push(currentRow);
+        }
       }
 
       return rows;
@@ -132,17 +168,22 @@
         tbody.innerHTML = "";
 
         rows.slice(1).forEach(row => {
+          if (!row[1]) return; // Skip if Order ID is missing
+
           const tr = document.createElement("tr");
 
-          row.slice(0, 9).forEach(cell => {
+          row.slice(0, 9).forEach((cell, i) => {
             const td = document.createElement("td");
-            td.textContent = cell;
+            td.setAttribute("data-label", rows[0][i]);
+            td.textContent = (i === 7) ? (cell || "N/A") : cell;
+            if (i === 7) td.style.fontSize = "15px"; // Bigger bank detail text
             tr.appendChild(td);
           });
 
           const status = row[8]?.toLowerCase();
           const orderID = row[1]?.trim();
           const tdBtn = document.createElement("td");
+          tdBtn.setAttribute("data-label", "Mark Complete");
 
           if (status === "completed") {
             tdBtn.innerHTML = `<span class="completed">Completed</span>`;
@@ -157,24 +198,20 @@
           tbody.appendChild(tr);
         });
       } catch (err) {
-        alert("❌ Failed to load order data. Make sure your Google Sheet is published.");
+        alert("❌ Failed to load order data.");
         console.error(err);
       }
     }
 
     async function markComplete(orderId, rowElement, button) {
-      const confirmAction = confirm("Mark this order as Completed?");
-      if (!confirmAction) return;
-
+      if (!confirm("Mark this order as Completed?")) return;
       button.disabled = true;
       button.textContent = "Processing...";
 
       try {
         const res = await fetch(updateURL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             action: "updateStatus",
             order_id: orderId,
@@ -192,7 +229,7 @@
           button.textContent = "Mark Complete";
         }
       } catch (e) {
-        alert("❌ Network error while updating.");
+        alert("❌ Network error.");
         button.disabled = false;
         button.textContent = "Mark Complete";
         console.error(e);
@@ -201,7 +238,7 @@
 
     window.onload = () => {
       fetchOrders();
-      setInterval(fetchOrders, 15000); // Refresh every 15 seconds
+      setInterval(fetchOrders, 15000);
     };
   </script>
 </body>
