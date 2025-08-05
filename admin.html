@@ -4,22 +4,99 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Panel - P2Pforyou</title>
-
-  <!-- 🧠 PWA Meta -->
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0d111c" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
   <style>
-    /* ... (your existing CSS remains unchanged) ... */
+    body {
+      background-color: #0d111c;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 8px;
+      text-align: left;
+      word-wrap: break-word;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #1e1f2b;
+    }
+    button {
+      background-color: #00ff88;
+      border: none;
+      color: #000;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button:hover {
+      background-color: #00cc66;
+    }
+    .completed {
+      background-color: #00cc66;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 5px;
+      text-align: center;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 13px;
+    }
+    td:last-child {
+      text-align: center;
+    }
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #333;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #1a1a1a;
+      }
+      td {
+        padding: 8px;
+        text-align: left;
+        position: relative;
+        border: none;
+        border-bottom: 1px solid #333;
+      }
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #aaa;
+        display: block;
+        margin-bottom: 5px;
+      }
+      td:last-child {
+        text-align: left;
+      }
+    }
   </style>
 
   <!-- 🔐 Login Protection -->
   <script>
-    const correctPassword = "FTXPENGUJUP@";
+    const correctPassword = "FTXPENGUJUP@"; // Change this if needed
     const isLoggedIn = localStorage.getItem("p2p_admin");
+
     if (isLoggedIn !== "true") {
       const input = prompt("Enter admin password:");
       if (input !== correctPassword) {
@@ -67,26 +144,35 @@
         const nextChar = csvText[i + 1];
 
         if (char === '"' && insideQuotes && nextChar === '"') {
-          currentField += '"'; i++;
+          currentField += '"';
+          i++;
         } else if (char === '"') {
           insideQuotes = !insideQuotes;
         } else if (char === ',' && !insideQuotes) {
-          currentRow.push(currentField); currentField = '';
+          currentRow.push(currentField);
+          currentField = '';
         } else if ((char === '\n' || char === '\r') && !insideQuotes) {
           if (currentField || currentRow.length > 0) {
             currentRow.push(currentField);
-            if (currentRow.some(cell => cell.trim() !== "")) rows.push(currentRow);
-            currentRow = []; currentField = '';
+            if (currentRow.some(cell => cell.trim() !== "")) {
+              rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = '';
           }
           if (char === '\r' && nextChar === '\n') i++;
         } else {
           currentField += char;
         }
       }
+
       if (currentField || currentRow.length > 0) {
         currentRow.push(currentField);
-        if (currentRow.some(cell => cell.trim() !== "")) rows.push(currentRow);
+        if (currentRow.some(cell => cell.trim() !== "")) {
+          rows.push(currentRow);
+        }
       }
+
       return rows;
     }
 
@@ -102,12 +188,8 @@
         const headers = rows[0];
         const dataRows = rows.slice(1).filter(r => r[1] && r.some(cell => cell.trim() !== ""));
 
-        if (!isSameData(dataRows, lastFetchedOrders)) {
-          if (lastFetchedOrders.length > 0 && dataRows.length > lastFetchedOrders.length) {
-            notify("📥 New order received!");
-          }
-          lastFetchedOrders = dataRows;
-        }
+        if (isSameData(dataRows, lastFetchedOrders)) return;
+        lastFetchedOrders = dataRows;
 
         const tbody = document.querySelector("#ordersTable tbody");
         tbody.innerHTML = "";
@@ -145,6 +227,7 @@
         });
       } catch (err) {
         console.error("Fetch error:", err);
+        // Don’t clear table if fetch fails
       }
     }
 
@@ -186,36 +269,10 @@
       }
     }
 
-    function notify(message) {
-      if (Notification.permission === "granted") {
-        new Notification(message);
-      }
-    }
-
-    function registerSW() {
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("service-worker.js")
-          .then(() => console.log("✅ Service Worker registered"))
-          .catch(err => console.error("SW failed:", err));
-      }
-    }
-
-    function requestNotificationPermission() {
-      if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission().then(permission => {
-          if (permission === "granted") {
-            notify("🔔 Notifications enabled!");
-          }
-        });
-      }
-    }
-
     window.onload = () => {
       fetchOrders();
-      setInterval(fetchOrders, 15000);
-      registerSW();
-      requestNotificationPermission();
+      setInterval(fetchOrders, 15000); // 15 sec auto-refresh
     };
   </script>
 </body>
-</html>
+</html>   
