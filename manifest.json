@@ -1,5 +1,5 @@
 {
-  "name": "P2Pforyou Admin",
+  "name": "P2Pforyou Admin Panel",
   "short_name": "P2P Admin",
   "start_url": "./admin.html",
   "display": "standalone",
