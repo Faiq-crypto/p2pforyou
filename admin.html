@@ -116,21 +116,20 @@
         const res = await fetch(updateURL, {
           method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            "Content-Type": "application/json"
           },
-          body: new URLSearchParams({
-            action: "updateStatus",
-            order_id: orderId,
+          body: JSON.stringify({
+            orderId: orderId, // ✅ Correct key name
             status: "Completed"
           })
         });
 
-        const text = await res.text();
-        if (text.includes("Success")) {
+        const result = await res.json();
+        if (result.success) {
           rowElement.cells[8].textContent = "Completed";
           rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
         } else {
-          alert("❌ Failed to update: " + text);
+          alert("❌ Failed to update: " + (result.error || "Unknown error"));
         }
       } catch (e) {
         alert("❌ Network error while updating.");
