@@ -39,6 +39,8 @@
     .completed {
       background-color: #00cc66;
       color: white;
+      padding: 4px 8px;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -63,56 +65,71 @@
   </table>
 
   <script>
-    const sheetURL = "https://script.google.com/macros/s/AKfycbyGzR6-cWA4lKSkk3vCHysgLdo39PJdLfmFevH3Ww8tYC73DPWgpNPsnPx3SrMhxFRC/exec";
+    const sheetCSVURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pub?output=csv";
+    const updateURL = "https://script.google.com/macros/s/AKfycbyGzR6-cWA4lKSkk3vCHysgLdo39PJdLfmFevH3Ww8tYC73DPWgpNPsnPx3SrMhxFRC/exec";
 
     async function loadOrders() {
-      const res = await fetch(sheetURL);
-      const data = await res.json();
-      const tbody = document.querySelector("#ordersTable tbody");
-      tbody.innerHTML = "";
+      try {
+        const res = await fetch(sheetCSVURL);
+        const csvText = await res.text();
+        const rows = csvText.trim().split('\n').map(line => line.split(','));
 
-      data.forEach((row, index) => {
-        if (index === 0) return; // skip header row
-        const tr = document.createElement("tr");
-        row.forEach((cell, i) => {
-          const td = document.createElement("td");
-          td.textContent = cell;
-          tr.appendChild(td);
+        const tbody = document.querySelector("#ordersTable tbody");
+        tbody.innerHTML = "";
+
+        rows.slice(1).forEach(row => {
+          const tr = document.createElement("tr");
+
+          row.forEach(cell => {
+            const td = document.createElement("td");
+            td.textContent = cell;
+            tr.appendChild(td);
+          });
+
+          const status = row[8];
+          const orderID = row[1];
+          const tdBtn = document.createElement("td");
+
+          if (status.toLowerCase() === "completed") {
+            tdBtn.innerHTML = `<span class="completed">Completed</span>`;
+          } else {
+            const btn = document.createElement("button");
+            btn.textContent = "Mark Complete";
+            btn.onclick = () => markComplete(orderID, tr);
+            tdBtn.appendChild(btn);
+          }
+
+          tr.appendChild(tdBtn);
+          tbody.appendChild(tr);
         });
-
-        const status = row[8]; // column 9 = status
-        const orderID = row[1]; // column 2 = order ID
-
-        const tdBtn = document.createElement("td");
-        if (status === "Completed") {
-          tdBtn.innerHTML = `<span class="completed">Completed</span>`;
-        } else {
-          const btn = document.createElement("button");
-          btn.textContent = "Mark Complete";
-          btn.onclick = () => markComplete(orderID, tr);
-          tdBtn.appendChild(btn);
-        }
-
-        tr.appendChild(tdBtn);
-        tbody.appendChild(tr);
-      });
+      } catch (err) {
+        alert("❌ Failed to load order data. Make sure your Google Sheet is published correctly.");
+        console.error(err);
+      }
     }
 
     async function markComplete(orderId, rowElement) {
-      const confirmAction = confirm("Are you sure you want to mark this order as Completed?");
+      const confirmAction = confirm("Mark this order as Completed?");
       if (!confirmAction) return;
 
-      await fetch(sheetURL, {
-        method: "POST",
-        body: JSON.stringify({ order_id: orderId, status: "Completed" }),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      try {
+        const res = await fetch(updateURL, {
+          method: "POST",
+          body: JSON.stringify({ order_id: orderId, status: "Completed" }),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
 
-      // Update status cell
-      rowElement.cells[8].textContent = "Completed"; // Status column
-      rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`; // Button column
+        if (res.ok) {
+          rowElement.cells[8].textContent = "Completed";
+          rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
+        } else {
+          alert("❌ Failed to update status. Try again.");
+        }
+      } catch (e) {
+        alert("❌ Network error while updating.");
+      }
     }
 
     window.onload = loadOrders;
