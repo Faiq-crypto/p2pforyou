@@ -94,7 +94,7 @@
 
   <!-- 🔐 Login Protection -->
   <script>
-    const correctPassword = "FTXPENGUJUP@"; // 🔒 Change this password
+    const correctPassword = "FTXPENGUJUP@"; // Change this if needed
     const isLoggedIn = localStorage.getItem("p2p_admin");
 
     if (isLoggedIn !== "true") {
@@ -133,6 +133,7 @@
     const updateURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
 
     const localStatusMap = {};
+    let lastFetchedOrders = [];
 
     function parseCSV(csvText) {
       const rows = [];
@@ -175,25 +176,29 @@
       return rows;
     }
 
+    function isSameData(newData, oldData) {
+      return JSON.stringify(newData) === JSON.stringify(oldData);
+    }
+
     async function fetchOrders() {
       try {
         const res = await fetch(sheetCSVURL, { cache: "no-store" });
         const csvText = await res.text();
         const rows = parseCSV(csvText);
+        const headers = rows[0];
+        const dataRows = rows.slice(1).filter(r => r[1] && r.some(cell => cell.trim() !== ""));
+
+        if (isSameData(dataRows, lastFetchedOrders)) return;
+        lastFetchedOrders = dataRows;
 
         const tbody = document.querySelector("#ordersTable tbody");
         tbody.innerHTML = "";
 
-        const headers = rows[0];
-
-        [...rows.slice(1)].reverse().forEach(row => {
-          if (!row[1] || row.every(cell => cell.trim() === "")) return;
-
+        [...dataRows].reverse().forEach(row => {
           const tr = document.createElement("tr");
           const orderID = row[1]?.trim();
           let status = row[8]?.toLowerCase();
 
-          // Use local status if exists
           if (localStatusMap[orderID]) {
             status = localStatusMap[orderID];
           }
@@ -221,8 +226,8 @@
           tbody.appendChild(tr);
         });
       } catch (err) {
-        alert("❌ Failed to load order data. Make sure your Google Sheet is published.");
-        console.error(err);
+        console.error("Fetch error:", err);
+        // Don’t clear table if fetch fails
       }
     }
 
@@ -248,16 +253,16 @@
 
         const text = await res.text();
         if (text.includes("Success")) {
-          localStatusMap[orderId] = "completed"; // store locally
+          localStatusMap[orderId] = "completed";
           rowElement.cells[8].textContent = "Completed";
           rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
         } else {
-          alert("❌ Failed to update: " + text);
+          alert("❌ Update failed: " + text);
           button.disabled = false;
           button.textContent = "Mark Complete";
         }
       } catch (e) {
-        alert("❌ Network error while updating.");
+        alert("❌ Network error.");
         button.disabled = false;
         button.textContent = "Mark Complete";
         console.error(e);
@@ -266,7 +271,7 @@
 
     window.onload = () => {
       fetchOrders();
-      setInterval(fetchOrders, 15000);
+      setInterval(fetchOrders, 15000); // 15 sec auto-refresh
     };
   </script>
 </body>
