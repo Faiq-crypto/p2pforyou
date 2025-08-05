@@ -84,11 +84,49 @@
     const sheetCSVURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pub?output=csv";
     const updateURL = "https://script.google.com/macros/s/AKfycbxmz66XR7jVhkgxaww7SLkseJULBQ0QVTs_rQ-x22t1IItdZDOUcup4M0DIUYE63kdG/exec";
 
+    // Robust CSV parser that respects quoted commas
+    function parseCSV(csvText) {
+      const rows = [];
+      let currentRow = [], currentField = '', insideQuotes = false;
+
+      for (let i = 0; i < csvText.length; i++) {
+        const char = csvText[i];
+        const nextChar = csvText[i + 1];
+
+        if (char === '"' && insideQuotes && nextChar === '"') {
+          currentField += '"';
+          i++;
+        } else if (char === '"') {
+          insideQuotes = !insideQuotes;
+        } else if (char === ',' && !insideQuotes) {
+          currentRow.push(currentField);
+          currentField = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+          if (currentField || currentRow.length > 0) {
+            currentRow.push(currentField);
+            rows.push(currentRow);
+            currentRow = [];
+            currentField = '';
+          }
+          if (char === '\r' && nextChar === '\n') i++; // Skip \n after \r
+        } else {
+          currentField += char;
+        }
+      }
+
+      if (currentField || currentRow.length > 0) {
+        currentRow.push(currentField);
+        rows.push(currentRow);
+      }
+
+      return rows;
+    }
+
     async function fetchOrders() {
       try {
         const res = await fetch(sheetCSVURL);
         const csvText = await res.text();
-        const rows = csvText.trim().split('\n').map(line => line.split(','));
+        const rows = parseCSV(csvText);
 
         const tbody = document.querySelector("#ordersTable tbody");
         tbody.innerHTML = "";
@@ -96,17 +134,17 @@
         rows.slice(1).forEach(row => {
           const tr = document.createElement("tr");
 
-          row.forEach(cell => {
+          row.slice(0, 9).forEach(cell => {
             const td = document.createElement("td");
             td.textContent = cell;
             tr.appendChild(td);
           });
 
-          const status = row[8];
+          const status = row[8]?.toLowerCase();
           const orderID = row[1];
           const tdBtn = document.createElement("td");
 
-          if (status.toLowerCase() === "completed") {
+          if (status === "completed") {
             tdBtn.innerHTML = `<span class="completed">Completed</span>`;
           } else {
             const btn = document.createElement("button");
@@ -156,7 +194,7 @@
 
     window.onload = () => {
       fetchOrders();
-      setInterval(fetchOrders, 10000);
+      setInterval(fetchOrders, 10000); // auto-refresh every 10s
     };
   </script>
 </body>
