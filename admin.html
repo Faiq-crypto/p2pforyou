@@ -8,136 +8,114 @@
     body {
       background-color: #0d111c;
       font-family: Arial, sans-serif;
-      color: white;
-      margin: 0;
+      color: #fff;
       padding: 20px;
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: #1e1f2b;
+      margin-top: 20px;
+      font-size: 14px;
     }
-
     th, td {
-      padding: 10px;
-      border: 1px solid #333;
+      border: 1px solid #555;
+      padding: 8px;
       text-align: left;
     }
-
     th {
-      background-color: #222;
+      background-color: #1e1f2b;
     }
-
     button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
       background-color: #00ff88;
-      color: black;
-      font-weight: bold;
+      border: none;
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 5px;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #00cc66;
+    }
+    .completed {
+      background-color: #00cc66;
+      color: white;
     }
   </style>
 </head>
 <body>
-
-  <h1>🧾 Admin Panel - P2Pforyou Orders</h1>
-
+  <h1>Admin Panel - P2Pforyou</h1>
   <table id="ordersTable">
     <thead>
       <tr>
-        <th>Timestamp</th>
+        <th>Time</th>
         <th>Order ID</th>
         <th>Network</th>
-        <th>USDT Amount</th>
+        <th>USDT</th>
         <th>Rate</th>
         <th>Total INR</th>
         <th>Payment Mode</th>
-        <th>Bank/UPI Info</th>
+        <th>Bank Details</th>
         <th>Status</th>
-        <th>Action</th>
+        <th>Mark Complete</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- Rows will be inserted here -->
-    </tbody>
+    <tbody></tbody>
   </table>
 
   <script>
-    // Replace with your Google Sheet's JSON URL
-    const SHEET_READ_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pubhtml";
+    const sheetURL = "https://script.google.com/macros/s/AKfycbyGzR6-cWA4lKSkk3vCHysgLdo39PJdLfmFevH3Ww8tYC73DPWgpNPsnPx3SrMhxFRC/exec";
 
-    // Already deployed Web App for updating status
-    const STATUS_UPDATE_URL = "https://script.google.com/macros/s/AKfycbyGzR6-cWA4lKSkk3vCHysgLdo39PJdLfmFevH3Ww8tYC73DPWgpNPsnPx3SrMhxFRC/exec";
+    async function loadOrders() {
+      const res = await fetch(sheetURL);
+      const data = await res.json();
+      const tbody = document.querySelector("#ordersTable tbody");
+      tbody.innerHTML = "";
 
-    // Fetch order data and render table
-    fetch(SHEET_READ_URL)
-      .then(res => res.json())
-      .then(data => {
-        const rows = data.values;
-        const tableBody = document.querySelector("#ordersTable tbody");
+      data.forEach((row, index) => {
+        if (index === 0) return; // skip header row
+        const tr = document.createElement("tr");
+        row.forEach((cell, i) => {
+          const td = document.createElement("td");
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
 
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i];
-          const tr = document.createElement("tr");
+        const status = row[8]; // column 9 = status
+        const orderID = row[1]; // column 2 = order ID
 
-          const status = row[8] || "Pending";
-
-          tr.innerHTML = `
-            <td>${row[0] || ''}</td>
-            <td>${row[1] || ''}</td>
-            <td>${row[2] || ''}</td>
-            <td>${row[3] || ''}</td>
-            <td>${row[4] || ''}</td>
-            <td>${row[5] || ''}</td>
-            <td>${row[6] || ''}</td>
-            <td>${row[7] || ''}</td>
-            <td id="status-${row[1]}">${status}</td>
-            <td>
-              ${status === "Completed" ? "✅" : `<button onclick="markCompleted('${row[1]}')">Mark Completed</button>`}
-            </td>
-          `;
-          tableBody.appendChild(tr);
-        }
-      })
-      .catch(err => {
-        console.error("Error loading orders:", err);
-        alert("Failed to load order data. Make sure your Google Sheet is published to the web.");
-      });
-
-    function markCompleted(orderId) {
-      fetch(STATUS_UPDATE_URL, {
-        method: "POST",
-        body: JSON.stringify({ orderId: orderId }),
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.text())
-      .then(response => {
-        if (response === "Success") {
-          document.getElementById(`status-${orderId}`).innerText = "Completed";
-          alert("Order marked as completed.");
-          location.reload();
+        const tdBtn = document.createElement("td");
+        if (status === "Completed") {
+          tdBtn.innerHTML = `<span class="completed">Completed</span>`;
         } else {
-          alert("Failed to mark order: " + response);
+          const btn = document.createElement("button");
+          btn.textContent = "Mark Complete";
+          btn.onclick = () => markComplete(orderID, tr);
+          tdBtn.appendChild(btn);
         }
-      })
-      .catch(err => {
-        console.error("Error updating status:", err);
-        alert("Failed to update status.");
+
+        tr.appendChild(tdBtn);
+        tbody.appendChild(tr);
       });
     }
-  </script>
 
+    async function markComplete(orderId, rowElement) {
+      const confirmAction = confirm("Are you sure you want to mark this order as Completed?");
+      if (!confirmAction) return;
+
+      await fetch(sheetURL, {
+        method: "POST",
+        body: JSON.stringify({ order_id: orderId, status: "Completed" }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      // Update status cell
+      rowElement.cells[8].textContent = "Completed"; // Status column
+      rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`; // Button column
+    }
+
+    window.onload = loadOrders;
+  </script>
 </body>
 </html>
-
