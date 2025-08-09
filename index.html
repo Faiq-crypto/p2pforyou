@@ -109,17 +109,13 @@ h1{
   margin-bottom:4px;
 }
 .network-select{
-  flex: 1;
-  min-width: 160px;
   display:flex;
   align-items:center;
   border:1px solid #333;
   border-radius: var(--radius);
   background:#2b313c;
-  padding:4px 8px;
-}
-.network-select select{
-  width:100%;
+  padding:4px;
+  flex:1;
 }
 select,input[type="number"],input[type="text"],textarea{
   background:transparent;
@@ -170,12 +166,12 @@ select,input[type="number"],input[type="text"],textarea{
   gap:10px;
 }
 .field input, .field select{
-  background:#2b313c; 
-  border:1px solid #555; 
+  background:#2b313c;
+  border:1px solid #555;
   padding:8px;
   border-radius: var(--radius);
   font-size:14px;
-  color:#fff; 
+  color:#fff;
 }
 
 /* Buttons */
@@ -246,7 +242,10 @@ select,input[type="number"],input[type="text"],textarea{
       <div class="swap-row">
         <div class="box">
           <div class="label">You Send</div>
-          <div style="display:flex;justify-content:space-between;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:16px;">
+              ₮
+            </div>
             <div class="network-select">
               <select id="network">
                 <option value="BEP20">USDT BEP20</option>
@@ -398,6 +397,7 @@ select,input[type="number"],input[type="text"],textarea{
     submitting = true;
     submitBtn.disabled = true;
     previewBtn.disabled = true;
+    submitBtn.textContent = "Submitting order...";
 
     const mode = paymentModeEl.value;
     const net = networkEl.value;
@@ -445,6 +445,7 @@ select,input[type="number"],input[type="text"],textarea{
     submitting = false;
     submitBtn.disabled = false;
     previewBtn.disabled = false;
+    submitBtn.textContent = "Submit Order";
   }
 
   function init(){
