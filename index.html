@@ -165,11 +165,12 @@ select,input[type="number"],input[type="text"],textarea{
   gap:10px;
 }
 .field input, .field select{
-  background:#222;
-  border:1px solid #333;
+  background:#2b313c; /* better contrast */
+  border:1px solid #555; /* lighter border */
   padding:8px;
   border-radius: var(--radius);
   font-size:14px;
+  color:#fff; /* brighter text */
 }
 
 /* Buttons */
@@ -384,11 +385,15 @@ select,input[type="number"],input[type="text"],textarea{
 
   async function submitOrder(){
     if(submitting) return;
+    submitting = true;
+    submitBtn.disabled = true;
+    previewBtn.disabled = true;
+
     const mode = paymentModeEl.value;
     const net = networkEl.value;
     const amt = parseFloat(usdtEl.value);
-    if(!mode) return alert('Select payment mode');
-    if(isNaN(amt)) return alert('Enter USDT amount');
+    if(!mode) { alert('Select payment mode'); resetSubmit(); return; }
+    if(isNaN(amt)) { alert('Enter USDT amount'); resetSubmit(); return; }
 
     const fd = new FormData();
     fd.append('payment_mode', mode);
@@ -410,18 +415,26 @@ select,input[type="number"],input[type="text"],textarea{
       fd.append('ifsc_code', document.getElementById('ifsc_code').value.trim());
     }
 
-    submitting = true;
-    submitBtn.disabled = true;
-
     try{
       const res = await fetch(scriptURL, { method: 'POST', body: fd });
       const txt = await res.text();
-      window.location.href = `waiting.html`;
+      const orderId = txt.trim();
+      if(orderId){
+        window.location.href = `waiting.html?order_id=${encodeURIComponent(orderId)}`;
+      } else {
+        alert('No Order ID received');
+        resetSubmit();
+      }
     }catch(err){
       alert('Submit failed');
-      submitBtn.disabled = false;
-      submitting = false;
+      resetSubmit();
     }
+  }
+
+  function resetSubmit(){
+    submitting = false;
+    submitBtn.disabled = false;
+    previewBtn.disabled = false;
   }
 
   function init(){
@@ -448,4 +461,4 @@ select,input[type="number"],input[type="text"],textarea{
 })();
 </script>
 </body>
-</html>
+  </html>
