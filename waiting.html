@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Waiting for Payment - P2Pforyou</title>
   <meta name="description" content="Waiting page for P2Pforyou orders. Shows countdown, status polling and rating after completion." />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root{
       --bg:#07101a; --panel:#0e1620; --muted:#9aa4b2; --accent:#00ff88; --accent-2:#00cc66; --glass:rgba(255,255,255,0.03);
@@ -31,6 +31,12 @@
     .order-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .meta-item{color:var(--muted);font-size:13px}
     .order-id{font-weight:700}
+    #addressEl {
+      cursor: pointer;
+      user-select: all;
+      color: var(--accent);
+      font-family: monospace;
+    }
 
     .right{text-align:center}
     .timer{font-weight:800;font-size:48px;color:var(--accent);letter-spacing:1px}
@@ -83,7 +89,7 @@
           <div class="meta-item">Order ID: <span class="order-id" id="orderIdEl">—</span></div>
           <div class="meta-item">Network: <span id="networkEl">—</span></div>
           <div class="meta-item">Amount: <strong id="amountEl">—</strong></div>
-          <div class="meta-item">Address: <span id="addressEl">—</span></div>
+          <div class="meta-item">Address: <span id="addressEl" title="Click to copy address">—</span></div>
           <div class="meta-item" id="timeStampEl"></div>
         </div>
         <div class="hint" id="hintText">Please don't close this page. Merchant has 10 minutes to accept and make payment.</div>
@@ -120,6 +126,13 @@
   </div>
 
   <script>
+    // Predefined wallet addresses by network
+    const walletAddresses = {
+      TRC20: 'TYourTRC20WalletAddressHere1234',
+      BEP20: '0xYourBEP20WalletAddressHere123456789abcdef',
+      Polygon: '0xYourPolygonWalletAddressHereabcdef123456789'
+    };
+
     const checkStatusURL = 'https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec';
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('orderId') || params.get('order_id') || '';
@@ -146,17 +159,42 @@
       countdownEl.textContent = '00:00';
     }
 
-    const tryFill = (key, el)=>{ const v = params.get(key); if(v) el.textContent = v; };
-    tryFill('orderId', orderIdEl); tryFill('order_id', orderIdEl);
-    tryFill('network', networkEl); tryFill('amount', amountEl); tryFill('address', addressEl);
-    const now = new Date(); timeStampEl.textContent = now.toLocaleString();
+    const tryFill = (key, el) => {
+      const v = params.get(key);
+      if(v) el.textContent = v;
+    };
+    tryFill('orderId', orderIdEl);
+    tryFill('order_id', orderIdEl);
+    tryFill('network', networkEl);
+    tryFill('amount', amountEl);
+
+    // Set address by network param, ignore address param from URL
+    function setAddressByNetwork(network) {
+      if(!network) {
+        addressEl.textContent = '—';
+        addressEl.title = '';
+        return;
+      }
+      const addr = walletAddresses[network] || '—';
+      addressEl.textContent = addr;
+      addressEl.title = 'Click to copy address';
+    }
+    const networkParam = params.get('network');
+    setAddressByNetwork(networkParam);
+
+    const now = new Date();
+    timeStampEl.textContent = now.toLocaleString();
 
     const TEN_MIN = 10 * 60 * 1000;
     const storageKey = 'p2p_wait_' + orderId;
     let endAt;
     const saved = localStorage.getItem(storageKey);
-    if(saved && !isNaN(Number(saved))){ endAt = Number(saved); }
-    else { endAt = Date.now() + TEN_MIN; localStorage.setItem(storageKey, endAt); }
+    if(saved && !isNaN(Number(saved))) {
+      endAt = Number(saved);
+    } else {
+      endAt = Date.now() + TEN_MIN;
+      localStorage.setItem(storageKey, endAt);
+    }
 
     function updateTimer(){
       const left = Math.max(0, Math.floor((endAt - Date.now())/1000));
@@ -177,9 +215,13 @@
         const res = await fetch(checkStatusURL + '?order_id=' + encodeURIComponent(orderId), {cache:'no-store'});
         let data;
         const txt = await res.text();
-        try{ data = JSON.parse(txt); } catch(e){
+        try{
+          data = JSON.parse(txt);
+        } catch(e){
           const m = txt.match(/\{[\s\S]*\}/);
-          if(m) try{ data = JSON.parse(m[0]); } catch(e2){ data = null; }
+          if(m) {
+            try{ data = JSON.parse(m[0]); } catch(e2){ data = null; }
+          }
         }
         if(!data){ console.warn('Could not parse status response', txt); return; }
         const status = (data.status || data.Status || '').toString().toLowerCase();
@@ -201,13 +243,20 @@
       }
     }
 
-    function startPolling(){ if(pollInterval) clearInterval(pollInterval); pollInterval = setInterval(()=>{ if(!document.hidden) checkStatus(); }, 5000); }
-    startPolling(); checkStatus();
+    function startPolling(){
+      if(pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(()=>{
+        if(!document.hidden) checkStatus();
+      }, 5000);
+    }
+    startPolling();
+    checkStatus();
 
-    copyBtn.addEventListener('click', async ()=>{
+    copyBtn.addEventListener('click', async () => {
       try{
         await navigator.clipboard.writeText(orderId);
-        copyBtn.textContent = 'Copied'; setTimeout(()=>copyBtn.textContent='Copy Order ID',1200);
+        copyBtn.textContent = 'Copied'; 
+        setTimeout(()=>copyBtn.textContent='Copy Order ID',1200);
       }catch(e){
         alert('Copy failed — select the Order ID and copy manually');
       }
@@ -221,7 +270,25 @@
       alert('No merchant contact provided.');
     });
 
-    refreshBtn.addEventListener('click', ()=>{ checkStatus(); refreshBtn.textContent='Checking...'; setTimeout(()=>refreshBtn.textContent='Check Status',900); });
+    refreshBtn.addEventListener('click', ()=>{
+      checkStatus();
+      refreshBtn.textContent='Checking...'; 
+      setTimeout(()=>refreshBtn.textContent='Check Status',900);
+    });
+
+    // Make address clickable to copy
+    addressEl.addEventListener('click', async () => {
+      const addr = addressEl.textContent;
+      if(addr && addr !== '—') {
+        try {
+          await navigator.clipboard.writeText(addr);
+          addressEl.textContent = 'Copied!';
+          setTimeout(() => setAddressByNetwork(networkParam), 1200);
+        } catch {
+          alert('Copy failed — select the address and copy manually');
+        }
+      }
+    });
 
     const ratingInputs = document.querySelectorAll('#ratingBox input');
     ratingInputs.forEach(inp=>inp.addEventListener('change', async (e)=>{
@@ -238,7 +305,10 @@
       lbl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') lbl.click(); });
     });
 
-    window.addEventListener('beforeunload', ()=>{ if(pollInterval) clearInterval(pollInterval); if(timer) clearInterval(timer); });
+    window.addEventListener('beforeunload', ()=>{
+      if(pollInterval) clearInterval(pollInterval);
+      if(timer) clearInterval(timer);
+    });
   </script>
 </body>
 </html>
