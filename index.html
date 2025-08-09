@@ -6,7 +6,6 @@
 <title>P2Pforyou — Sell USDT</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-/* same CSS as before */
 :root{
   --bg1:#060914; --bg2:#071427; --panel:#0e1620; --muted:#98a3b3; --accent:#00ff88; --accent-2:#00cc66;
   --radius:14px; --shadow:0 10px 40px rgba(2,8,23,0.6); font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;
@@ -68,7 +67,6 @@ select,input,textarea{
 </div>
 
 <form id="orderForm" enctype="multipart/form-data" autocomplete="off">
-  <!-- Payment mode first -->
   <label for="payment_mode">Payment Receiving Mode</label>
   <select id="payment_mode" name="payment_mode" required>
     <option value="">-- Select Payment Mode --</option>
@@ -77,7 +75,6 @@ select,input,textarea{
     <option value="Bank">Bank Transfer</option>
   </select>
 
-  <!-- Conditional payment fields -->
   <div id="modeFields"></div>
 
   <label for="network">USDT Network</label>
@@ -88,7 +85,7 @@ select,input,textarea{
   </select>
 
   <label for="usdt">USDT Amount</label>
-  <input id="usdt" name="usdt_amount" type="number" inputmode="decimal" step="0.01" required />
+  <input id="usdt" name="usdt_amount" type="number" inputmode="decimal" step="0.01" min="1.2" max="500" required />
 
   <div class="amount-info">
     <div class="small">Rate: <span id="rateDisplay">—</span></div>
@@ -141,18 +138,17 @@ function getRate(amount){
 }
 
 function updateAddress(){ addressEl.value = addresses[networkEl.value] || addresses.BEP20; }
-networkEl.addEventListener('change', updateAddress);
-updateAddress();
 
-// Payment mode changes -> update min
+networkEl.addEventListener('change', updateAddress);
+
 paymentModeEl.addEventListener('change', ()=>{
   renderModeFields();
   if(paymentModeEl.value === 'CDM'){
     usdtEl.min = 50;
-    usdtEl.value = 50;
+    if(usdtEl.value < 50) usdtEl.value = 50;
   } else {
     usdtEl.min = 1.2;
-    usdtEl.value = 1.2;
+    if(usdtEl.value < 1.2) usdtEl.value = 1.2;
   }
   usdtEl.dispatchEvent(new Event('input'));
 });
@@ -163,27 +159,28 @@ function renderModeFields(){
   if(mode === 'UPI'){
     modeFields.innerHTML = `
       <label>UPI ID</label>
-      <input name="upi_id" placeholder="yourupi@bank" />
+      <input name="upi_id" placeholder="yourupi@bank" required />
       <label>Upload Scanner (PNG only)</label>
-      <input name="scanner" type="file" accept="image/png" />
+      <input name="scanner" type="file" accept="image/png" required />
     `;
   } else if(mode === 'CDM'){
     modeFields.innerHTML = `
-      <label>Account Number</label><input name="cdm_account_number" />
-      <label>Bank Name</label><input name="cdm_bank_name" />
-      <label>Account Holder</label><input name="cdm_holder_name" />
+      <label>Account Number</label><input name="cdm_account_number" required />
+      <label>Bank Name</label><input name="cdm_bank_name" required />
+      <label>Account Holder</label><input name="cdm_holder_name" required />
     `;
   } else if(mode === 'Bank'){
     modeFields.innerHTML = `
       <label>Select Bank</label>
-      <select name="bank_name_select">
+      <select name="bank_name_select" required>
+        <option value="">--Select--</option>
         <option>HDFC Bank</option>
         <option>ICICI Bank</option>
         <option>SBI</option>
       </select>
-      <label>Account Number</label><input name="bank_account_number" />
-      <label>Account Holder</label><input name="bank_holder_name" />
-      <label>IFSC</label><input name="ifsc_code" />
+      <label>Account Number</label><input name="bank_account_number" required />
+      <label>Account Holder</label><input name="bank_holder_name" required />
+      <label>IFSC</label><input name="ifsc_code" required />
     `;
   }
 }
@@ -201,42 +198,52 @@ copyBtn.addEventListener('click', async ()=>{
   try{
     await navigator.clipboard.writeText(addressEl.value);
     copyBtn.textContent = 'Copied';
-    setTimeout(()=>copyBtn.textContent='📋 Copy', 1200);
   }catch(e){
     addressEl.select();
     document.execCommand('copy');
     copyBtn.textContent='Copied';
-    setTimeout(()=>copyBtn.textContent='📋 Copy', 1200);
   }
+  setTimeout(()=>copyBtn.textContent='📋 Copy', 1200);
 });
 
-// Preview
 previewBtn.addEventListener('click', ()=>{
-  const amount = usdtEl.value, net = networkEl.value, addr = addressEl.value, mode = paymentModeEl.value;
+  const amount = parseFloat(usdtEl.value);
+  const net = networkEl.value;
+  const addr = addressEl.value;
+  const mode = paymentModeEl.value;
   if(!amount || !mode) return alert('Enter amount and select payment mode to preview.');
-  const rate = getRate(parseFloat(amount)) || 0;
-  const inr = (parseFloat(amount) * rate).toFixed(2);
+  const rate = getRate(amount) || 0;
+  const inr = (amount * rate).toFixed(2);
   const msg = `Confirm order:\nNetwork: ${net}\nAmount: ${amount} USDT\nYou will receive: ₹${inr}\nSend to: ${addr}`;
   if(confirm(msg)) form.requestSubmit();
 });
 
-// Submit
 form.addEventListener('submit', async (e)=>{
   e.preventDefault();
   const scannerInput = form.querySelector('input[name="scanner"]');
   if(scannerInput && scannerInput.files.length){
     const f = scannerInput.files[0];
-    if(f.type !== 'image/png'){ alert('Scanner file must be a PNG'); return; }
+    if(f.type !== 'image/png' || !f.name.toLowerCase().endsWith('.png')){
+      alert('Scanner file must be a PNG'); return;
+    }
   }
   submitBtn.disabled = true;
   const fd = new FormData(form);
   fd.append('client_ts', new Date().toISOString());
-  const res = await fetch(scriptURL, { method:'POST', body: fd });
-  const txt = await res.text();
-  window.location.href = `waiting.html?orderId=${encodeURIComponent(txt.trim())}`;
+  try{
+    const res = await fetch(scriptURL, { method:'POST', body: fd });
+    const txt = await res.text();
+    window.location.href = `waiting.html?orderId=${encodeURIComponent(txt.trim())}`;
+  }catch(err){
+    alert('Error submitting form. Please try again.');
+    submitBtn.disabled = false;
+  }
 });
 
-document.addEventListener('DOMContentLoaded', ()=>{ updateAddress(); renderModeFields(); });
+document.addEventListener('DOMContentLoaded', ()=>{
+  updateAddress();
+  renderModeFields();
+});
 </script>
 </body>
 </html>
