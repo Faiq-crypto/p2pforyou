@@ -8,122 +8,125 @@
 <style>
   :root{
     --bg-1:#041025; --bg-2:#071227;
-    --card:#0b1620; --glass: rgba(255,255,255,0.03);
-    --accent:#00ff88; --accent-2:#00cc66; --muted:#98a3b3;
-    --radius:16px; --shadow: 0 12px 40px rgba(2,8,23,0.7);
-    --glass-2: rgba(255,255,255,0.02);
+    --card:#071720; --glass: rgba(255,255,255,0.03);
+    --accent:#00ff88; --accent-2:#00cc66; --accent-3:#00e6a3;
+    --muted:#98a3b3;
+    --radius:16px; --shadow: 0 16px 50px rgba(2,8,23,0.7);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
-    background: radial-gradient(1200px 600px at 10% 10%, rgba(0,255,136,0.03), transparent 6%),
-                linear-gradient(135deg,var(--bg-1),var(--bg-2));
-    color:#e6fff2; display:flex;align-items:center;justify-content:center;padding:20px;
+    background:
+      radial-gradient(1000px 400px at 10% 10%, rgba(0,255,136,0.03), transparent 6%),
+      linear-gradient(135deg,var(--bg-1),var(--bg-2));
+    color:#e6fff2; display:flex;align-items:center;justify-content:center;padding:18px;
   }
 
-  .container{width:100%;max-width:680px}
+  .container{width:100%;max-width:740px;padding:12px}
   .panel{
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border-radius:20px;padding:18px;border:1px solid rgba(255,255,255,0.03);
-    box-shadow:var(--shadow);
-    backdrop-filter: blur(6px);
+    box-shadow:var(--shadow);backdrop-filter: blur(6px);
+    overflow:hidden;
   }
 
-  header.top{
-    display:flex;align-items:center;gap:12px;margin-bottom:12px;
-  }
-  .logo{
-    background:linear-gradient(90deg,var(--accent),var(--accent-2));
-    padding:8px 12px;border-radius:10px;color:#001;font-weight:700;
-  }
+  header.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .logo{background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:8px 12px;border-radius:10px;color:#001;font-weight:800}
   h1{font-size:18px;margin:0}
   .lead{color:var(--muted);font-size:13px;margin-top:6px}
 
   /* Payment mode selector */
-  .mode-row{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+  .mode-row{display:flex;flex-direction:column;gap:8px;margin:6px 0 12px}
   .caption{color:var(--muted);font-size:13px}
 
   /* Swap card */
   .swap{
     margin-top:8px;background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
     padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.02);
-    display:flex;flex-direction:column;gap:10px;transition:transform .28s ease;
+    display:flex;flex-direction:column;gap:10px;transition:transform .28s cubic-bezier(.2,.9,.2,1);
   }
   .swap-row{display:flex;gap:12px;align-items:center}
   .box{
     background:var(--card);padding:12px;border-radius:12px;flex:1;border:1px solid rgba(255,255,255,0.02);
+    transition:transform .18s ease, box-shadow .18s ease;
   }
+  .box:active{transform:translateY(1px)}
   .label{font-size:12px;color:var(--muted);margin-bottom:6px}
   .float-row{display:flex;gap:8px;align-items:center}
   .network-select{
-    display:flex;gap:8px;align-items:center;background:rgba(255,255,255,0.03);padding:6px;border-radius:10px;
+    display:flex;gap:8px;align-items:center;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding:6px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);
   }
-  select,input[type="number"],input[type="text"]{
-    background:transparent;border:none;color:inherit;font-size:15px;outline:none;padding:6px;
+  select,input[type="number"],input[type="text"],textarea{
+    background:transparent;border:none;color:inherit;font-size:15px;outline:none;padding:6px;width:100%;
   }
   input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-  .big-input{font-size:20px;font-weight:600}
+  .big-input{font-size:20px;font-weight:700;text-align:right}
   .inr-display{font-size:18px;font-weight:700;text-align:right}
 
   /* arrow */
   .arrow-wrap{display:flex;align-items:center;justify-content:center;margin:6px 0}
   .arrow{
-    width:46px;height:46px;border-radius:50%;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    width:52px;height:52px;border-radius:50%;background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
     display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.02);
     transform:translateY(0);transition:transform .18s ease, box-shadow .18s ease;
   }
-  .arrow:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.45)}
+  .arrow:hover{transform:translateY(-6px);box-shadow:0 18px 48px rgba(0,0,0,0.45)}
   .arrow svg{fill:var(--accent)}
 
   .rate-line{text-align:center;color:var(--muted);font-size:13px;margin-top:6px}
 
   /* Payment details */
-  .payment{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:10px}
+  .payment{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px}
   .field{display:flex;flex-direction:column;gap:6px}
   .small-caption{font-size:12px;color:var(--muted)}
-
-  .address-row{display:flex;gap:8px;align-items:center}
-  .address-row input{flex:1;background:transparent;border:1px dashed rgba(255,255,255,0.03);padding:10px;border-radius:10px;font-family:monospace}
-  .copy-btn{padding:10px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#001;font-weight:700;cursor:pointer}
+  label{font-size:13px;color:var(--muted);margin-bottom:6px}
 
   /* actions */
-  .actions{display:flex;gap:10px;margin-top:10px}
-  .btn{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-weight:700}
-  .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#001}
+  .actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+  .btn{flex:1;padding:12px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-3));color:#001;box-shadow:0 8px 30px rgba(0,255,136,0.06)}
   .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.03);color:#fff}
 
-  /* micro */
   .hint{font-size:12px;color:var(--muted)}
   .muted{color:var(--muted)}
 
-  /* responsive */
-  @media (max-width:520px){
-    .swap-row{flex-direction:column}
-    .arrow-wrap{display:none}
+  /* animated highlight for INR */
+  .inr-anim{
+    animation: pulse .42s ease;
+  }
+  @keyframes pulse{
+    0%{ transform: scale(0.98); opacity:0.9 }
+    60%{ transform: scale(1.02); opacity:1 }
+    100%{ transform: scale(1); opacity:1 }
   }
 
-  /* subtle input focus */
-  select:focus, input:focus, .copy-btn:focus, .btn:focus { box-shadow:0 6px 22px rgba(0,0,0,0.45) inset; outline:none }
-  /* smooth number transitions */
-  .value-anim{transition:all .12s linear}
+  /* responsive */
+  @media (max-width:700px){
+    .swap-row{flex-direction:column}
+    .arrow-wrap{display:none}
+    .container{padding:6px}
+    .panel{padding:12px;border-radius:14px}
+    .big-input{font-size:18px}
+  }
 </style>
 </head>
 <body>
   <div class="container">
-    <div class="panel">
+    <div class="panel" role="main" aria-labelledby="pageTitle">
       <header class="top">
         <div class="logo">P2Pforyou</div>
         <div>
-          <h1>Sell USDT — Swap style</h1>
-          <div class="lead">Fast P2P order. Choose payment mode, pick network, enter USDT — get INR instantly.</div>
+          <h1 id="pageTitle">Sell USDT — Swap style</h1>
+          <div class="lead">Fast P2P order. Choose payment mode, pick network, enter USDT — INR updates instantly.</div>
         </div>
       </header>
 
-      <!-- Payment mode at top -->
+      <!-- Payment mode selector (top) -->
       <div class="mode-row">
-        <div class="label">Payment Receiving Mode <span class="hint">(choose first)</span></div>
+        <label class="label">Payment Receiving Mode <span class="hint">(select first)</span></label>
         <select id="payment_mode" aria-label="Payment mode">
           <option value="">-- Select Payment Mode --</option>
           <option value="UPI">UPI (instant)</option>
@@ -136,11 +139,11 @@
       <!-- Swap Card -->
       <div class="swap" id="swapCard" role="region" aria-label="Swap card">
         <div class="swap-row">
-          <div class="box">
+          <div class="box" id="sendBox">
             <div class="label">You Send</div>
             <div class="float-row" style="justify-content:space-between;">
               <div style="display:flex;gap:8px;align-items:center;">
-                <div class="network-select">
+                <div class="network-select" title="Choose network">
                   <select id="network" aria-label="Network">
                     <option value="BEP20">USDT BEP20</option>
                     <option value="Polygon">USDT Polygon</option>
@@ -152,43 +155,34 @@
                 <input id="usdt" class="big-input" type="number" inputmode="decimal" step="0.01" min="1.2" max="500" placeholder="0.00" aria-label="USDT amount">
               </div>
             </div>
-            <div class="small-caption muted">Min and Max enforced. Type amount to update INR instantly.</div>
+            <div class="small-caption muted">Min & Max enforced. Type amount to update INR instantly.</div>
           </div>
 
-          <div class="box" style="min-width:160px;">
+          <div class="box" id="receiveBox" style="min-width:160px;">
             <div class="label">You Receive</div>
-            <div class="inr-display value-anim" id="inrDisplay">—</div>
+            <div id="inrDisplay" class="inr-display">—</div>
             <div class="small-caption muted" id="rateDisplay">Rate: —</div>
           </div>
         </div>
 
         <div class="arrow-wrap" title="Swap arrow (visual)">
           <div class="arrow" aria-hidden="true">
-            <!-- simple down arrow -->
-            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg>
           </div>
         </div>
 
-        <div class="rate-line muted">Rates shown are per-range (used to calculate INR). Exact rate applied after you enter amount.</div>
+        <div class="rate-line muted">Rates shown are per-range and applied by amount range. Exact INR updates live as you type.</div>
 
-        <!-- Payment details -->
+        <!-- Payment details (fields shown based on payment mode) -->
         <div class="payment" id="paymentSection">
           <div class="field">
             <div class="label">Payment Details</div>
-            <div class="caption">Fill details according to selected payment receiving mode.</div>
+            <div class="caption">Provide details required for the selected receiving mode (UPI/CDM/Bank).</div>
           </div>
 
           <div id="modeFields"></div>
 
-          <div class="field">
-            <div class="label">Send USDT to</div>
-            <div class="address-row">
-              <input id="usdt_address" readonly aria-label="USDT receive address" />
-              <button class="copy-btn" id="copyAddressBtn" type="button">Copy</button>
-            </div>
-            <div class="hint">Address updates with selected network.</div>
-          </div>
-
+          <div class="hint muted">After you submit, you'll be redirected to the waiting page where we will show the USDT address and next steps.</div>
         </div>
 
         <!-- Actions -->
@@ -198,25 +192,17 @@
         </div>
       </div>
 
-      <div style="margin-top:10px;color:var(--muted);font-size:13px">Support • Live chat (coming soon)</div>
+      <div style="margin-top:12px;color:var(--muted);font-size:13px">Support • Live chat (coming soon)</div>
     </div>
   </div>
 
 <script>
 /* -------------- CONFIG -------------- */
-/* Set your Apps Script endpoint here (unchanged from what you've been using) */
+/* Your Apps Script endpoint */
 const scriptURL = 'https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec';
 
-/* Addresses per network */
-const addresses = {
-  BEP20: '0x1A63d865D881E15D4103a5c031a67C0d63e9849C',
-  Polygon: '0x1A63d865D881E15D4103a5c031a67C0d63e9849C',
-  TRC20: 'TUYMmZN5oTfyjDZ8zqbqsfepdbvBgoBDz3'
-};
-
-/* Rate table (kept per your ranges) */
+/* Rate function (per your ranges) */
 function getRate(amount){
-  // amount is number
   if(amount >= 1.2 && amount <= 10) return 83.5;
   if(amount > 10 && amount <= 30.99) return 84;
   if(amount > 30.99 && amount <= 100.99) return 85.2;
@@ -225,30 +211,20 @@ function getRate(amount){
   return 0;
 }
 
-/* -------------- DOM -------------- */
+/* DOM */
 const paymentModeEl = document.getElementById('payment_mode');
 const networkEl = document.getElementById('network');
 const usdtEl = document.getElementById('usdt');
 const inrEl = document.getElementById('inrDisplay');
 const rateEl = document.getElementById('rateDisplay');
 const modeFields = document.getElementById('modeFields');
-const addressEl = document.getElementById('usdt_address');
-const copyBtn = document.getElementById('copyAddressBtn');
 const previewBtn = document.getElementById('previewBtn');
 const submitBtn = document.getElementById('submitBtn');
 
-/* utility: format currency */
-function fmtINR(n){
-  // conservative formatting — keep two decimals
-  return Number(n).toFixed(2);
-}
+/* helper: format INR */
+function fmt(n){ return Number(n).toFixed(2); }
 
-/* update address when network changes */
-function updateAddress(){
-  addressEl.value = addresses[networkEl.value] || addresses.BEP20;
-}
-
-/* render fields depending on payment mode */
+/* render payment-specific fields */
 function renderModeFields(){
   const mode = paymentModeEl.value;
   modeFields.innerHTML = '';
@@ -257,7 +233,7 @@ function renderModeFields(){
       <div class="field">
         <label class="label">UPI ID</label>
         <input id="upi_id" placeholder="example@bank" />
-        <div class="small-caption muted">Upload a scanner (PNG). We'll save it to your order.</div>
+        <div class="small-caption muted">Upload scanner (PNG). We'll attach this to your order for verification.</div>
         <input id="scanner" type="file" accept="image/png" />
       </div>
     `;
@@ -279,7 +255,7 @@ function renderModeFields(){
   } else if(mode === 'Bank'){
     modeFields.innerHTML = `
       <div class="field">
-        <label class="label">Select Bank</label>
+        <label class="label">Bank</label>
         <select id="bank_name_select">
           <option value="">--Select bank--</option>
           <option>HDFC Bank</option>
@@ -302,12 +278,11 @@ function renderModeFields(){
       </div>
     `;
   } else {
-    // nothing chosen yet
-    modeFields.innerHTML = `<div class="hint muted">Choose a payment mode to show required fields.</div>`;
+    modeFields.innerHTML = `<div class="hint muted">Choose a payment mode to show the required fields.</div>`;
   }
 }
 
-/* enforce min based on mode and update INR */
+/* enforce minimums & set default value */
 function applyMinForMode(){
   const mode = paymentModeEl.value;
   if(mode === 'CDM'){
@@ -320,8 +295,7 @@ function applyMinForMode(){
   updateINR();
 }
 
-/* update INR display & rate with a small animation bump */
-let lastINR = '';
+/* live INR update */
 function updateINR(){
   const raw = parseFloat(usdtEl.value);
   if(isNaN(raw)){
@@ -329,69 +303,38 @@ function updateINR(){
     inrEl.textContent = '—';
     return;
   }
-  // clamp max
   let v = raw;
-  if(v > 500) { v = 500; usdtEl.value = 500; alert('Maximum allowed is 500 USDT'); }
-  // enforce min (in case user typed below)
+  if(v > 500){ v = 500; usdtEl.value = 500; alert('Maximum allowed is 500 USDT'); }
   const min = parseFloat(usdtEl.min || 1.2);
   if(v < min){
-    rateEl.textContent = `Min ${min} USDT required for selected mode`;
+    rateEl.textContent = `Min ${min} USDT required`;
     inrEl.textContent = '—';
     return;
   }
-
   const rate = getRate(v);
-  if(rate === 0){
-    rateEl.textContent = 'Rate: —';
-    inrEl.textContent = '—';
-    return;
-  }
+  if(rate === 0){ rateEl.textContent = 'Rate: —'; inrEl.textContent = '—'; return; }
   const inr = v * rate;
-  // animate numeric change with small class toggle
-  inrEl.classList.remove('value-anim');
-  void inrEl.offsetWidth;
-  inrEl.classList.add('value-anim');
-
-  rateEl.textContent = `Rate: ₹${rate.toFixed(2)}`;
-  inrEl.textContent = `₹${fmtINR(inr)}`;
-  lastINR = inrEl.textContent;
+  rateEl.textContent = `Rate: ₹${rate.toFixed(2)}`
+  inrEl.textContent = `₹${fmt(inr)}`;
+  // visual pulse
+  inrEl.classList.remove('inr-anim'); void inrEl.offsetWidth; inrEl.classList.add('inr-anim');
 }
 
-/* clipboard copy with fallback */
-async function copyAddress(){
-  const txt = addressEl.value || '';
-  try{
-    await navigator.clipboard.writeText(txt);
-    copyBtn.textContent = 'Copied';
-  }catch(e){
-    // fallback
-    addressEl.select();
-    try{ document.execCommand('copy'); copyBtn.textContent = 'Copied'; }catch(_){ alert('Copy your address manually'); }
-  }
-  setTimeout(()=> copyBtn.textContent = 'Copy', 1200);
-}
-
-/* Preview modal (native confirm for simplicity) */
+/* Preview */
 function previewOrder(){
-  // gather fields
   const mode = paymentModeEl.value;
   const net = networkEl.value;
   const amt = parseFloat(usdtEl.value);
-  if(!mode){ return alert('Select payment mode first'); }
-  if(isNaN(amt)){ return alert('Enter USDT amount'); }
-
+  if(!mode) return alert('Select payment mode first');
+  if(isNaN(amt)) return alert('Enter USDT amount');
   const min = parseFloat(usdtEl.min || 1.2);
   if(amt < min) return alert(`Minimum for ${mode} is ${min} USDT`);
-
-  const rate = getRate(amt);
-  const inr = (amt * rate).toFixed(2);
-  let details = `Preview order:\n\nNetwork: ${net}\nAmount: ${amt} USDT\nYou will receive: ₹${inr}\nMode: ${mode}\n\nProceed?`;
-  if(confirm(details)){
-    submitOrder(); // allow confirm to directly submit
-  }
+  const rate = getRate(amt), inr = (amt * rate).toFixed(2);
+  const summary = `Preview order:\n\nNetwork: ${net}\nAmount: ${amt} USDT\nYou will receive: ₹${inr}\nMode: ${mode}\n\nProceed to submit?`;
+  if(confirm(summary)) submitOrder();
 }
 
-/* Submit order to Apps Script */
+/* Submit flow - builds FormData and POSTs to Apps Script */
 let submitting = false;
 async function submitOrder(){
   if(submitting) return;
@@ -400,12 +343,11 @@ async function submitOrder(){
   const amt = parseFloat(usdtEl.value);
   if(!mode) return alert('Select payment mode first');
   if(isNaN(amt)) return alert('Enter USDT amount');
-
   const min = parseFloat(usdtEl.min || 1.2);
   if(amt < min) return alert(`Minimum for ${mode} is ${min} USDT`);
   if(amt > 500) return alert('Maximum is 500 USDT');
 
-  // validate payment-mode-specific fields
+  // validate fields per mode
   if(mode === 'UPI'){
     const upiEl = document.getElementById('upi_id');
     const scannerEl = document.getElementById('scanner');
@@ -432,15 +374,15 @@ async function submitOrder(){
     if(!ifsc || !ifsc.value.trim()) return alert('Enter IFSC');
   }
 
-  // prepare FormData like earlier integrations expect
+  // build FormData
   const fd = new FormData();
   fd.append('payment_mode', mode);
   fd.append('network', net);
-  fd.append('usdt_amount', amt.toString());
-  fd.append('usdt_address', addressEl.value || '');
+  fd.append('usdt_amount', amt.toFixed(2));
+  // We intentionally do NOT append usdt_address here — address will be provided on the waiting page.
   fd.append('client_ts', new Date().toISOString());
 
-  // include payment detail fields
+  // include mode-specific fields
   if(mode === 'UPI'){
     fd.append('upi_id', document.getElementById('upi_id').value.trim());
     const scannerEl = document.getElementById('scanner');
@@ -465,26 +407,25 @@ async function submitOrder(){
   try{
     const res = await fetch(scriptURL, { method: 'POST', body: fd });
     const txt = await res.text();
-    // try parse JSON first
+    // try to parse order id
     let orderId = null;
     try{
       const j = JSON.parse(txt);
       orderId = j.orderId || j.order_id || j.id || j.OrderID || null;
-    }catch(_){ }
+    }catch(_){}
     if(!orderId){
       const m = txt.match(/[A-Za-z0-9\-_]{6,}/);
       if(m) orderId = m[0];
     }
     const cleaned = txt.trim();
-    if(!orderId && cleaned.length > 0 && cleaned.length < 300) orderId = cleaned;
+    if(!orderId && cleaned.length && cleaned.length < 300) orderId = cleaned;
 
-    // redirect to submit.html (your requested page)
-    const redirectUrl = orderId ? `submit.html?orderId=${encodeURIComponent(orderId)}` : `submit.html`;
+    // redirect to waiting page (address will be shown there)
+    const redirectUrl = orderId ? `waiting.html?orderId=${encodeURIComponent(orderId)}` : `waiting.html`;
     window.location.href = redirectUrl;
-
   }catch(err){
     console.error('submit error', err);
-    alert('Submission failed — please try again.');
+    alert('Submission failed — try again.');
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit Order';
     previewBtn.disabled = false;
@@ -492,29 +433,46 @@ async function submitOrder(){
   }
 }
 
-/* -------------- events -------------- */
-networkEl.addEventListener('change', ()=>{
-  updateAddress();
-});
+/* Events */
 paymentModeEl.addEventListener('change', ()=>{
   renderModeFields();
   applyMinForMode();
+  // small visual highlight
+  const card = document.getElementById('swapCard');
+  card.style.transform = 'translateY(-6px)';
+  setTimeout(()=>card.style.transform = '', 260);
 });
-usdtEl.addEventListener('input', ()=>{
-  // avoid scientific notation issues by parsing to two decimal places where appropriate
-  // and updating INR
-  updateINR();
-});
+networkEl.addEventListener('change', ()=>{ updateINR(); });
+usdtEl.addEventListener('input', ()=>{ updateINR(); });
 
-/* copy */
-copyBtn.addEventListener('click', copyAddress);
-
-/* preview & submit */
 previewBtn.addEventListener('click', previewOrder);
 submitBtn.addEventListener('click', submitOrder);
 
-/* initialize */
+/* init */
 document.addEventListener('DOMContentLoaded', ()=>{
   renderModeFields();
-  updateAddress();
-  //
+  // initial min
+  usdtEl.min = 1.2;
+  if(!usdtEl.value) usdtEl.value = 1.2;
+  updateINR();
+});
+
+/* helper used above (updateINR alias) */
+function updateINR(){ updateINR_internal(); }
+function updateINR_internal(){
+  const val = parseFloat(usdtEl.value);
+  if(isNaN(val)){ rateEl.textContent='Rate: —'; inrEl.textContent='—'; return; }
+  let v = val;
+  if(v > 500){ v = 500; usdtEl.value = 500; alert('Maximum allowed is 500 USDT'); }
+  const min = parseFloat(usdtEl.min || 1.2);
+  if(v < min){ rateEl.textContent = `Min ${min} USDT required`; inrEl.textContent = '—'; return; }
+  const rate = getRate(v);
+  if(!rate){ rateEl.textContent='Rate: —'; inrEl.textContent='—'; return; }
+  const inr = v * rate;
+  rateEl.textContent = `Rate: ₹${rate.toFixed(2)}`;
+  inrEl.textContent = `₹${fmt(inr)}`;
+  inrEl.classList.remove('inr-anim'); void inrEl.offsetWidth; inrEl.classList.add('inr-anim');
+}
+</script>
+</body>
+</html>
