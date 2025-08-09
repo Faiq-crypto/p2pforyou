@@ -7,109 +7,108 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg1:#060914; --bg2:#071427; --panel:#0e1620; --muted:#98a3b3; --accent:#00ff88; --accent-2:#00cc66;
-  --radius:14px; --shadow:0 10px 40px rgba(2,8,23,0.6); font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;
+  --bg1:#060914; --bg2:#071427; --panel:#0e1620; --muted:#98a3b3;
+  --accent:#00ff88; --accent2:#00cc66;
+  --radius:14px; --shadow:0 10px 40px rgba(2,8,23,0.6);
+  font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial;
 }
-*{box-sizing:border-box}
-html,body{height:100%}
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-  margin:0; background:linear-gradient(135deg,var(--bg1),var(--bg2)); color:#eaf6f1;
-  padding:18px; display:flex;align-items:center;justify-content:center;
-  background-image: radial-gradient(circle at 10% 10%, rgba(0,255,136,0.03), transparent 6%), radial-gradient(circle at 90% 95%, rgba(255,255,255,0.02), transparent 12%);
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:#fff; font-family:Inter;
+  min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px;
 }
-.app{width:100%;max-width:520px}
-.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  padding:18px;border-radius:var(--radius);box-shadow:var(--shadow);
-  border:1px solid rgba(255,255,255,0.03)}
-header{display:flex;gap:12px;align-items:center}
-.brand{background:linear-gradient(90deg,var(--accent),#33ffd4);color:#001;font-weight:700;padding:8px 12px;border-radius:10px}
-h1{font-size:18px;margin:0}
-p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
-.rates{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.rate{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-  padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);font-size:13px}
-.rate strong{color:var(--accent)}
-form{margin-top:16px;display:grid;gap:10px}
-label{font-size:13px;color:var(--muted)}
+.card{
+  background:var(--panel);
+  padding:20px; border-radius:var(--radius);
+  box-shadow:var(--shadow); width:100%; max-width:480px;
+}
+h1{font-size:20px;margin-bottom:14px;text-align:center}
+.swap-box{
+  background:rgba(255,255,255,0.02);
+  border-radius:var(--radius); padding:14px; display:flex; flex-direction:column; gap:10px;
+}
+.swap-field{
+  background:rgba(255,255,255,0.03);
+  padding:12px; border-radius:var(--radius);
+}
+.swap-label{font-size:13px;color:var(--muted);margin-bottom:4px}
+.swap-input-row{display:flex;align-items:center;gap:8px}
+.swap-input-row select, .swap-input-row input{
+  flex:1;padding:10px;border-radius:var(--radius);border:none;
+  background:rgba(255,255,255,0.06);color:#fff;font-size:14px
+}
+.rate-info{text-align:center;font-size:13px;color:var(--muted);margin:8px 0}
+.payment-section{margin-top:16px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
 select,input,textarea{
-  width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);
-  background:var(--panel);color:inherit;font-size:14px;outline:none
+  width:100%;padding:10px;border-radius:var(--radius);
+  border:none;background:rgba(255,255,255,0.06);color:#fff;
+  font-size:14px;margin-bottom:10px
 }
-.address-box{display:flex;gap:8px;align-items:center}
+.address-box{display:flex;gap:8px;margin-bottom:10px}
 .address-box input{flex:1;font-family:monospace}
-.copy-btn{padding:10px 12px;border-radius:10px;border:none;background:rgba(255,255,255,0.03);cursor:pointer}
-.helper{font-size:13px;color:var(--muted)}
-.amount-info{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.small{font-size:12px;color:var(--muted)}
-.actions{display:flex;gap:10px;margin-top:8px}
-.btn{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;cursor:pointer}
-.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#001;border:none;font-weight:700}
-.watermark{position:fixed;right:18px;bottom:18px;opacity:0.06;font-weight:900;font-size:120px;transform:rotate(-12deg);pointer-events:none}
+.copy-btn{padding:10px 12px;border-radius:var(--radius);
+  border:none;background:rgba(255,255,255,0.1);cursor:pointer;color:#fff
+}
+.actions{display:flex;gap:10px;margin-top:12px}
+.btn{flex:1;padding:12px;border-radius:var(--radius);
+  border:none;cursor:pointer;font-weight:600}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#001}
+.btn.secondary{background:rgba(255,255,255,0.1);color:#fff}
 </style>
 </head>
 <body>
-<div class="app">
-<div class="card" role="main">
-<header>
-  <div class="brand">P2Pforyou</div>
-  <div>
-    <h1>Sell USDT</h1>
-    <p class="lead">Fast P2P orders — choose network, payment mode and submit.</p>
+<div class="card">
+  <h1>Sell USDT</h1>
+  
+  <!-- Swap Box -->
+  <div class="swap-box">
+    <div class="swap-field">
+      <div class="swap-label">You Send</div>
+      <div class="swap-input-row">
+        <select id="network" name="network">
+          <option value="BEP20">USDT BEP20</option>
+          <option value="Polygon">USDT Polygon</option>
+          <option value="TRC20">USDT TRC20</option>
+        </select>
+        <input type="number" id="usdt" step="0.01" min="1.2" max="500" placeholder="0.00" />
+      </div>
+    </div>
+    <div class="swap-field">
+      <div class="swap-label">You Receive (INR)</div>
+      <input type="text" id="inrDisplay" readonly placeholder="—" />
+    </div>
   </div>
-</header>
+  <div class="rate-info">Rate: <span id="rateDisplay">—</span></div>
 
-<div class="rates">
-  <div class="rate">1.2 – 10 USDT: <strong>₹83.5</strong></div>
-  <div class="rate">10 – 30.99 USDT: <strong>₹84</strong></div>
-  <div class="rate">30.99 – 100.99 USDT: <strong>₹85.2</strong></div>
-  <div class="rate">100.99 – 380.9 USDT: <strong>₹86</strong></div>
-  <div class="rate">380.9 – 500 USDT: <strong>₹86.6</strong></div>
-</div>
+  <!-- Payment Section -->
+  <div class="payment-section">
+    <label>Payment Receiving Mode</label>
+    <select id="payment_mode">
+      <option value="">-- Select Payment Mode --</option>
+      <option value="UPI">UPI</option>
+      <option value="CDM">CDM</option>
+      <option value="Bank">Bank Transfer</option>
+    </select>
 
-<form id="orderForm" enctype="multipart/form-data" autocomplete="off">
-  <label for="payment_mode">Payment Receiving Mode</label>
-  <select id="payment_mode" name="payment_mode" required>
-    <option value="">-- Select Payment Mode --</option>
-    <option value="UPI">UPI</option>
-    <option value="CDM">CDM</option>
-    <option value="Bank">Bank Transfer</option>
-  </select>
+    <div id="modeFields"></div>
 
-  <div id="modeFields"></div>
-
-  <label for="network">USDT Network</label>
-  <select id="network" name="network" required>
-    <option value="BEP20">USDT BEP20</option>
-    <option value="Polygon">USDT Polygon</option>
-    <option value="TRC20">USDT TRC20</option>
-  </select>
-
-  <label for="usdt">USDT Amount</label>
-  <input id="usdt" name="usdt_amount" type="number" inputmode="decimal" step="0.01" min="1.2" max="500" required />
-
-  <div class="amount-info">
-    <div class="small">Rate: <span id="rateDisplay">—</span></div>
-    <div class="small">You get: <span id="inrDisplay">—</span></div>
+    <label>Send USDT to</label>
+    <div class="address-box">
+      <input id="usdt_address" readonly />
+      <button type="button" class="copy-btn" id="copyAddressBtn">Copy</button>
+    </div>
   </div>
 
-  <label>Send USDT to</label>
-  <div class="address-box">
-    <input id="usdt_address" name="usdt_address" type="text" readonly />
-    <button type="button" class="copy-btn" id="copyAddressBtn">📋 Copy</button>
-  </div>
-
+  <!-- Actions -->
   <div class="actions">
-    <button type="button" class="btn" id="previewBtn">Preview</button>
-    <button type="submit" class="btn primary" id="submitBtn">Submit Order</button>
+    <button class="btn secondary" id="previewBtn">Preview</button>
+    <button class="btn primary" id="submitBtn">Submit</button>
   </div>
-</form>
 </div>
-</div>
-<div class="watermark">P2Pforyou</div>
 
 <script>
-const scriptURL = 'https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec';
-
 const networkEl = document.getElementById('network');
 const usdtEl = document.getElementById('usdt');
 const rateEl = document.getElementById('rateDisplay');
@@ -120,7 +119,6 @@ const modeFields = document.getElementById('modeFields');
 const copyBtn = document.getElementById('copyAddressBtn');
 const submitBtn = document.getElementById('submitBtn');
 const previewBtn = document.getElementById('previewBtn');
-const form = document.getElementById('orderForm');
 
 const addresses = {
   BEP20: '0x1A63d865D881E15D4103a5c031a67C0d63e9849C',
@@ -137,21 +135,9 @@ function getRate(amount){
   return 0;
 }
 
-function updateAddress(){ addressEl.value = addresses[networkEl.value] || addresses.BEP20; }
-
-networkEl.addEventListener('change', updateAddress);
-
-paymentModeEl.addEventListener('change', ()=>{
-  renderModeFields();
-  if(paymentModeEl.value === 'CDM'){
-    usdtEl.min = 50;
-    if(usdtEl.value < 50) usdtEl.value = 50;
-  } else {
-    usdtEl.min = 1.2;
-    if(usdtEl.value < 1.2) usdtEl.value = 1.2;
-  }
-  usdtEl.dispatchEvent(new Event('input'));
-});
+function updateAddress(){
+  addressEl.value = addresses[networkEl.value] || addresses.BEP20;
+}
 
 function renderModeFields(){
   const mode = paymentModeEl.value;
@@ -159,90 +145,49 @@ function renderModeFields(){
   if(mode === 'UPI'){
     modeFields.innerHTML = `
       <label>UPI ID</label>
-      <input name="upi_id" placeholder="yourupi@bank" required />
-      <label>Upload Scanner (PNG only)</label>
-      <input name="scanner" type="file" accept="image/png" required />
+      <input placeholder="yourupi@bank" />
     `;
   } else if(mode === 'CDM'){
     modeFields.innerHTML = `
-      <label>Account Number</label><input name="cdm_account_number" required />
-      <label>Bank Name</label><input name="cdm_bank_name" required />
-      <label>Account Holder</label><input name="cdm_holder_name" required />
+      <label>Account Number</label><input />
+      <label>Bank Name</label><input />
     `;
   } else if(mode === 'Bank'){
     modeFields.innerHTML = `
-      <label>Select Bank</label>
-      <select name="bank_name_select" required>
-        <option value="">--Select--</option>
-        <option>HDFC Bank</option>
-        <option>ICICI Bank</option>
-        <option>SBI</option>
-      </select>
-      <label>Account Number</label><input name="bank_account_number" required />
-      <label>Account Holder</label><input name="bank_holder_name" required />
-      <label>IFSC</label><input name="ifsc_code" required />
+      <label>Account Number</label><input />
+      <label>IFSC</label><input />
     `;
   }
 }
 
+networkEl.addEventListener('change', updateAddress);
+paymentModeEl.addEventListener('change', renderModeFields);
+
 usdtEl.addEventListener('input', ()=>{
   let v = parseFloat(usdtEl.value);
-  if(isNaN(v)) { rateEl.textContent = '—'; inrEl.textContent = '—'; return; }
-  if(v > 500){ v = 500; usdtEl.value = 500; alert('Maximum allowed is 500 USDT'); }
+  if(isNaN(v)){ rateEl.textContent = '—'; inrEl.value = ''; return; }
+  if(v > 500){ v = 500; usdtEl.value = 500; }
   const rate = getRate(v);
-  if(rate === 0){ rateEl.textContent='Invalid amount'; inrEl.textContent='—'; }
-  else{ rateEl.textContent = '₹' + rate.toFixed(2); inrEl.textContent = '₹' + (v * rate).toFixed(2); }
+  rateEl.textContent = rate ? '₹' + rate.toFixed(2) : '—';
+  inrEl.value = rate ? (v * rate).toFixed(2) : '';
 });
 
 copyBtn.addEventListener('click', async ()=>{
-  try{
-    await navigator.clipboard.writeText(addressEl.value);
-    copyBtn.textContent = 'Copied';
-  }catch(e){
-    addressEl.select();
-    document.execCommand('copy');
-    copyBtn.textContent='Copied';
-  }
-  setTimeout(()=>copyBtn.textContent='📋 Copy', 1200);
+  await navigator.clipboard.writeText(addressEl.value);
+  copyBtn.textContent = 'Copied';
+  setTimeout(()=>copyBtn.textContent = 'Copy', 1000);
 });
 
 previewBtn.addEventListener('click', ()=>{
-  const amount = parseFloat(usdtEl.value);
-  const net = networkEl.value;
-  const addr = addressEl.value;
-  const mode = paymentModeEl.value;
-  if(!amount || !mode) return alert('Enter amount and select payment mode to preview.');
-  const rate = getRate(amount) || 0;
-  const inr = (amount * rate).toFixed(2);
-  const msg = `Confirm order:\nNetwork: ${net}\nAmount: ${amount} USDT\nYou will receive: ₹${inr}\nSend to: ${addr}`;
-  if(confirm(msg)) form.requestSubmit();
+  alert(`Preview:\n${usdtEl.value} USDT → ₹${inrEl.value}\nNetwork: ${networkEl.value}`);
 });
 
-form.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const scannerInput = form.querySelector('input[name="scanner"]');
-  if(scannerInput && scannerInput.files.length){
-    const f = scannerInput.files[0];
-    if(f.type !== 'image/png' || !f.name.toLowerCase().endsWith('.png')){
-      alert('Scanner file must be a PNG'); return;
-    }
-  }
-  submitBtn.disabled = true;
-  const fd = new FormData(form);
-  fd.append('client_ts', new Date().toISOString());
-  try{
-    const res = await fetch(scriptURL, { method:'POST', body: fd });
-    const txt = await res.text();
-    window.location.href = `waiting.html?orderId=${encodeURIComponent(txt.trim())}`;
-  }catch(err){
-    alert('Error submitting form. Please try again.');
-    submitBtn.disabled = false;
-  }
+submitBtn.addEventListener('click', ()=>{
+  alert('Submitting order...');
 });
 
 document.addEventListener('DOMContentLoaded', ()=>{
   updateAddress();
-  renderModeFields();
 });
 </script>
 </body>
