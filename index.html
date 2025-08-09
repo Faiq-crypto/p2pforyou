@@ -109,12 +109,17 @@ h1{
   margin-bottom:4px;
 }
 .network-select{
+  flex: 1;
+  min-width: 160px;
   display:flex;
   align-items:center;
   border:1px solid #333;
   border-radius: var(--radius);
   background:#2b313c;
-  padding:4px;
+  padding:4px 8px;
+}
+.network-select select{
+  width:100%;
 }
 select,input[type="number"],input[type="text"],textarea{
   background:transparent;
@@ -165,12 +170,12 @@ select,input[type="number"],input[type="text"],textarea{
   gap:10px;
 }
 .field input, .field select{
-  background:#2b313c;
-  border:1px solid #555;
+  background:#2b313c; 
+  border:1px solid #555; 
   padding:8px;
   border-radius: var(--radius);
   font-size:14px;
-  color:#fff;
+  color:#fff; 
 }
 
 /* Buttons */
