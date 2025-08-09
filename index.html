@@ -107,15 +107,6 @@ h1{
   font-size:12px;
   color: var(--text-muted);
   margin-bottom:4px;
-  display:flex;
-  align-items:center;
-}
-.label svg{
-  width:16px;
-  height:16px;
-  vertical-align:middle;
-  margin-right:8px;
-  flex-shrink:0;
 }
 .network-select{
   display:flex;
@@ -160,7 +151,6 @@ select,input[type="number"],input[type="text"],textarea{
   display:flex;
   align-items:center;
   justify-content:center;
-  cursor:default;
 }
 .arrow svg{
   fill:var(--accent);
@@ -175,12 +165,12 @@ select,input[type="number"],input[type="text"],textarea{
   gap:10px;
 }
 .field input, .field select{
-  background:#2b313c; /* better contrast */
-  border:1px solid #555; /* lighter border */
+  background:#2b313c;
+  border:1px solid #555;
   padding:8px;
   border-radius: var(--radius);
   font-size:14px;
-  color:#fff; /* brighter text */
+  color:#fff;
 }
 
 /* Buttons */
@@ -248,58 +238,36 @@ select,input[type="number"],input[type="text"],textarea{
     </div>
 
     <div class="swap" id="swapCard">
-      <div class="swap-row" style="align-items:center;">
-
-        <!-- You Send -->
+      <div class="swap-row">
         <div class="box">
-          <div class="label">
-            <!-- Inline USDT-ish SVG (green circle + T bar) -->
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
-              <circle cx="32" cy="32" r="30" fill="#00ff88"/>
-              <!-- simplified 'T' -->
-              <rect x="18" y="18" width="28" height="6" rx="3" fill="#ffffff"/>
-              <rect x="30" y="24" width="4" height="24" rx="2" fill="#ffffff"/>
-            </svg>
-            You Send
-          </div>
-
-          <div class="small-caption" style="margin-bottom:6px;">Select Network</div>
+          <div class="label">You Send</div>
           <div style="display:flex;justify-content:space-between;gap:8px;">
-            <div class="network-select" aria-hidden="false">
+            <div class="network-select">
               <select id="network">
                 <option value="BEP20">USDT BEP20</option>
                 <option value="Polygon">USDT Polygon</option>
                 <option value="TRC20">USDT TRC20</option>
               </select>
             </div>
-            <input id="usdt" type="number" class="big-input" step="0.01" min="1.2" max="500" placeholder="0.00" aria-label="USDT amount">
+            <input id="usdt" type="number" class="big-input" step="0.01" min="1.2" max="500" placeholder="0.00">
           </div>
           <div class="small-caption">Min & Max enforced.</div>
         </div>
 
-        <!-- Swap Arrow -->
-        <div class="arrow-wrap" aria-hidden="true" title="Swap">
-          <div class="arrow">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M17 1l4 4-4 4V6H3V4h14V1zm-10 22l-4-4 4-4v3h14v2H7v3z"/>
-            </svg>
-          </div>
-        </div>
-
-        <!-- You Receive -->
         <div class="box">
-          <div class="label">
-            <!-- Inline INR SVG: green circle with rupee symbol -->
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img">
-              <circle cx="32" cy="32" r="30" fill="#ffffff"/>
-              <text x="50%" y="52%" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="28" fill="#00ff88" dy=".1em">₹</text>
-            </svg>
-            You Receive
+          <div class="label">You Receive</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:16px;">
+              ₹
+            </div>
+            <div id="inrDisplay" class="inr-display">—</div>
           </div>
-          <div id="inrDisplay" class="inr-display">—</div>
           <div id="rateDisplay" class="small-caption">Rate: —</div>
         </div>
+      </div>
 
+      <div class="arrow-wrap">
+        <div class="arrow"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg></div>
       </div>
 
       <div class="payment" id="paymentSection">
