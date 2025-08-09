@@ -238,9 +238,14 @@ select,input[type="number"],input[type="text"],textarea{
     </div>
 
     <div class="swap" id="swapCard">
-      <div class="swap-row">
+      <div class="swap-row" style="align-items:center;">
+        <!-- You Send -->
         <div class="box">
-          <div class="label">You Send</div>
+          <div class="label">
+            <img src="https://cryptologos.cc/logos/tether-usdt-logo.svg?v=025" alt="USDT" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;">
+            You Send
+          </div>
+          <div class="small-caption" style="margin-bottom:6px;">Select Network</div>
           <div style="display:flex;justify-content:space-between;gap:8px;">
             <div class="network-select">
               <select id="network">
@@ -254,15 +259,22 @@ select,input[type="number"],input[type="text"],textarea{
           <div class="small-caption">Min & Max enforced.</div>
         </div>
 
+        <!-- Swap Arrow -->
+        <div class="arrow-wrap">
+          <div class="arrow" title="Swap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4V6H3V4h14V1zm-10 22l-4-4 4-4v3h14v2H7v3z"/></svg>
+          </div>
+        </div>
+
+        <!-- You Receive -->
         <div class="box">
-          <div class="label">You Receive</div>
+          <div class="label">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Indian_Rupee_symbol.svg" alt="INR" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">
+            You Receive
+          </div>
           <div id="inrDisplay" class="inr-display">—</div>
           <div id="rateDisplay" class="small-caption">Rate: —</div>
         </div>
-      </div>
-
-      <div class="arrow-wrap">
-        <div class="arrow"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 16l-6-6h12z"/></svg></div>
       </div>
 
       <div class="payment" id="paymentSection">
@@ -378,7 +390,7 @@ select,input[type="number"],input[type="text"],textarea{
     if(isNaN(amt)) return alert('Enter USDT amount');
     const rate = getRate(amt);
     if(!rate) return alert('Invalid amount');
-    if(confirm(`Preview:\n${amt} USDT on ${net}\nReceive ₹${fmt(amt*rate)}\nMode: ${mode}`)){
+    if(confirm(`Preview:\\n${amt} USDT on ${net}\\nReceive ₹${fmt(amt*rate)}\\nMode: ${mode}`)){
       submitOrder();
     }
   }
@@ -461,4 +473,4 @@ select,input[type="number"],input[type="text"],textarea{
 })();
 </script>
 </body>
-  </html>
+</html>
