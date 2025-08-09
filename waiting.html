@@ -1,196 +1,266 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Waiting for Payment</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Waiting for Payment - P2Pforyou</title>
+  <meta name="description" content="Waiting page for P2Pforyou orders. Shows countdown, status polling and rating after completion." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    :root{
+      --bg:#07101a; --panel:#0e1620; --muted:#9aa4b2; --accent:#00ff88; --accent-2:#00cc66; --glass:rgba(255,255,255,0.03);
+      --radius:14px; --radius-sm:10px; --success:#00cc66; --danger:#ff5a7a;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
     }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:linear-gradient(180deg,#041017 0%, #071a2a 100%);
+      color:#eaf6f1;display:flex;align-items:center;justify-content:center;padding:20px;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+    }.container{width:100%;max-width:720px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:20px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 10px 40px rgba(2,8,23,0.7)}
+header{display:flex;gap:12px;align-items:center}
+.badge{background:linear-gradient(90deg,var(--accent),#2effd1);color:#001;font-weight:700;padding:8px 12px;border-radius:10px}
+h1{font-size:18px;margin:0}
+p.lead{color:var(--muted);margin-top:6px;font-size:13px}
 
-    body {
-      background: linear-gradient(135deg, #0d0d0d, #1a1a40);
-      color: #ffffff;
-      font-family: 'Inter', sans-serif;
-      text-align: center;
-      padding: 40px 20px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
+.card{margin-top:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:14px;align-items:center}
 
-    .status {
-      font-size: 20px;
-      font-weight: 500;
-      margin-bottom: 20px;
-      animation: fadeIn 1s ease-in-out;
-    }
+.left{flex:1;min-width:0}
+.order-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.meta-item{color:var(--muted);font-size:13px}
+.order-id{font-weight:700}
 
-    .timer {
-      font-size: 50px;
-      font-weight: 600;
-      color: #00ffa2;
-      margin-bottom: 30px;
-      animation: pulse 1.5s infinite;
-    }
+.right{text-align:center}
+.timer{font-weight:800;font-size:48px;color:var(--accent);letter-spacing:1px}
+.status-text{margin-top:8px;color:var(--muted);font-size:14px}
 
-    .rating {
-      display: none;
-      margin-top: 30px;
-      animation: fadeIn 1s ease-in-out;
-    }
+.actions{display:flex;gap:10px;margin-top:14px}
+.btn{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--panel);cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#001;border:none}
+.btn.ghost{background:transparent;color:var(--muted)}
 
-    .rating p {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
+.status-completed{display:none;margin-top:18px;padding:12px;border-radius:10px;background:linear-gradient(90deg,#05221a,#0b2b24);border:1px solid rgba(0,255,136,0.06)}
+.status-completed .big{font-size:22px;font-weight:700;color:var(--accent)}
+.smile{font-size:34px}
 
-    .rating input[type="radio"] {
-      display: none;
-    }
+/* rating */
+.rating{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.rating input{display:none}
+.rating label{font-size:36px;cursor:pointer;color:rgba(255,255,255,0.18);transition:transform .18s ease, color .18s ease}
+.rating label:hover{transform:scale(1.12);color:#ffd666}
+.rating input:checked ~ label, .rating label.selected{color:#ffd666}
 
-    .rating .stars {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
+.hint{color:var(--muted);font-size:13px;margin-top:10px;text-align:center}
 
-    .rating label {
-      font-size: 40px;
-      color: #555;
-      cursor: pointer;
-      transition: transform 0.3s, color 0.3s;
-      filter: drop-shadow(0 0 2px rgba(255,255,255,0.2));
-    }
+/* small animation */
+@keyframes floatIn{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.card, .status-completed{animation:floatIn .22s ease both}
 
-    .rating label:hover,
-    .rating label:hover ~ label {
-      color: #ffd700;
-      text-shadow: 0 0 5px #ffd700aa;
-      transform: scale(1.1);
-    }
+/* responsive */
+@media (max-width:520px){
+  .timer{font-size:34px}
+  .card{flex-direction:column;align-items:flex-start}
+  .right{text-align:left;width:100%}
+  .rating label{font-size:30px}
+}
 
-    .rating input:checked ~ label {
-      color: #ffd700;
-      text-shadow: 0 0 5px #ffd700aa;
-    }
-
-    #thankYou {
-      font-size: 18px;
-      color: #66ffcc;
-      margin-top: 15px;
-      display: none;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.85; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 600px) {
-      .timer {
-        font-size: 36px;
-      }
-
-      .status {
-        font-size: 18px;
-      }
-
-      .rating label {
-        font-size: 36px;
-      }
-    }
   </style>
 </head>
 <body>
-
-  <div class="status" id="statusText">📦 Order has been sent. It is being processed by the merchant. Please wait...</div>
-  <div class="timer" id="countdown">10:00</div>
-
-  <div class="rating" id="ratingSection">
-    <p>Please rate our service:</p>
-    <form id="ratingForm" class="stars">
-      <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
-      <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
-      <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
-      <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
-      <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
-    </form>
-    <div id="thankYou">✨ Thank you for your feedback!</div>
+  <div class="container" role="main">
+    <header>
+      <div class="badge">P2Pforyou</div>
+      <div>
+        <h1>Waiting for Merchant Payment</h1>
+        <p class="lead">We received your order. This page will update when the merchant marks the order as completed.</p>
+      </div>
+    </header><div class="card" aria-live="polite">
+  <div class="left">
+    <div class="order-meta">
+      <div class="meta-item">Order ID: <span class="order-id" id="orderIdEl">—</span></div>
+      <div class="meta-item">Network: <span id="networkEl">—</span></div>
+      <div class="meta-item">Amount: <strong id="amountEl">—</strong></div>
+      <div class="meta-item" id="timeStampEl"> </div>
+    </div>
+    <div class="hint" id="hintText">Please don't close this page. Merchant has 10 minutes to accept and make payment.</div>
+    <div class="actions">
+      <button class="btn ghost" id="copyBtn">Copy Order ID</button>
+      <button class="btn" id="contactBtn">Chat with Merchant</button>
+      <button class="btn primary" id="refreshBtn">Check Status</button>
+    </div>
   </div>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get("orderId");
+  <div class="right">
+    <div class="timer" id="countdown">10:00</div>
+    <div class="status-text" id="statusText">📦 Order sent — waiting for merchant to process payment</div>
+  </div>
+</div>
 
-    const countdownDisplay = document.getElementById("countdown");
-    const statusText = document.getElementById("statusText");
-    const ratingSection = document.getElementById("ratingSection");
-    const checkStatusURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
+<div class="status-completed" id="completedBox" role="status" aria-hidden="true">
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center">
+    <div class="smile">😊</div>
+    <div style="text-align:center">
+      <div class="big" id="completedMsg">Payment received — Order completed</div>
+      <div style="color:var(--muted);margin-top:6px" id="completedTime"> </div>
+    </div>
+  </div>
 
-    // Persistent timer using localStorage
-    const storageKey = `countdown_${orderId}`;
-    const startTime = Date.now();
-    const tenMinutes = 10 * 60 * 1000;
+  <div class="rating" id="ratingBox" style="margin-top:14px">
+    <input type="radio" id="r1" name="rating" value="1"><label for="r1">★</label>
+    <input type="radio" id="r2" name="rating" value="2"><label for="r2">★</label>
+    <input type="radio" id="r3" name="rating" value="3"><label for="r3">★</label>
+    <input type="radio" id="r4" name="rating" value="4"><label for="r4">★</label>
+    <input type="radio" id="r5" name="rating" value="5"><label for="r5">★</label>
+  </div>
+  <div class="hint" id="thanksText" style="display:none">✨ Thank you — your feedback has been recorded.</div>
+</div>
 
-    let saved = localStorage.getItem(storageKey);
-    let countdownEnd = saved ? parseInt(saved) : startTime + tenMinutes;
+  </div>  <script>
+    // Keep backend URL exactly as provided
+    const checkStatusURL = 'https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec';
 
-    if (!saved) localStorage.setItem(storageKey, countdownEnd);
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('orderId') || params.get('order_id') || '';
 
-    function updateCountdown() {
-      let now = Date.now();
-      let timeLeft = Math.max(0, Math.floor((countdownEnd - now) / 1000));
-      let minutes = Math.floor(timeLeft / 60);
-      let seconds = timeLeft % 60;
-      countdownDisplay.textContent =
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    const orderIdEl = document.getElementById('orderIdEl');
+    const networkEl = document.getElementById('networkEl');
+    const amountEl = document.getElementById('amountEl');
+    const timeStampEl = document.getElementById('timeStampEl');
+    const countdownEl = document.getElementById('countdown');
+    const statusText = document.getElementById('statusText');
+    const completedBox = document.getElementById('completedBox');
+    const completedMsg = document.getElementById('completedMsg');
+    const completedTime = document.getElementById('completedTime');
+    const ratingBox = document.getElementById('ratingBox');
+    const thanksText = document.getElementById('thanksText');
+
+    const copyBtn = document.getElementById('copyBtn');
+    const contactBtn = document.getElementById('contactBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // If orderId missing, show message and stop
+    if(!orderId){
+      orderIdEl.textContent = 'Missing';
+      statusText.textContent = 'Order ID missing. Please return to the site and try again.';
+      countdownEl.textContent = '00:00';
     }
 
-    const timerInterval = setInterval(() => {
-      updateCountdown();
-      if (Date.now() >= countdownEnd) {
-        clearInterval(timerInterval);
+    // populate UI from query params (keep backward-compatible names)
+    const tryFill = (key, el)=>{ const v = params.get(key); if(v) el.textContent = v; };
+    tryFill('orderId', orderIdEl); tryFill('order_id', orderIdEl);
+    tryFill('network', networkEl); tryFill('amount', amountEl); tryFill('inr', document.getElementById('amountEl'));
+    // timestamp display
+    const now = new Date(); timeStampEl.textContent = now.toLocaleString();
+
+    // persistent countdown logic (10 minutes default)
+    const TEN_MIN = 10 * 60 * 1000;
+    const storageKey = 'p2p_wait_' + orderId;
+    let endAt;
+
+    const saved = localStorage.getItem(storageKey);
+    if(saved && !isNaN(Number(saved))){ endAt = Number(saved); }
+    else { endAt = Date.now() + TEN_MIN; localStorage.setItem(storageKey, endAt); }
+
+    function updateTimer(){
+      const left = Math.max(0, Math.floor((endAt - Date.now())/1000));
+      const mm = String(Math.floor(left/60)).padStart(2,'0');
+      const ss = String(left%60).padStart(2,'0');
+      countdownEl.textContent = mm + ':' + ss;
+      if(left <= 0){
+        statusText.textContent = '⏳ Time expired — merchant did not respond in time.';
       }
-    }, 1000);
+    }
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
 
-    updateCountdown(); // initial call
-
-    // Order status check
-    async function checkStatus() {
-      try {
-        const res = await fetch(`${checkStatusURL}?order_id=${orderId}`);
-        const data = await res.json();
-
-        if (data.status === "Completed") {
-          statusText.textContent = "✅ Order has been completed!";
-          countdownDisplay.textContent = "00:00";
-          ratingSection.style.display = "block";
-          clearInterval(statusInterval);
-          clearInterval(timerInterval);
+    // Polling for status
+    let pollInterval = null;
+    async function checkStatus(){
+      if(!orderId) return;
+      try{
+        const res = await fetch(checkStatusURL + '?order_id=' + encodeURIComponent(orderId), {cache:'no-store'});
+        // some Apps Script endpoints return JSON, others return HTML containing a JSON string — handle both
+        let data;
+        const txt = await res.text();
+        try{ data = JSON.parse(txt); } catch(e){
+          // try to extract JSON substring
+          const m = txt.match(/\{[\s\S]*\}/);
+          if(m) try{ data = JSON.parse(m[0]); } catch(e2){ data = null; }
         }
-      } catch (error) {
-        console.error("Status check failed:", error);
+        if(!data){ console.warn('Could not parse status response', txt); return; }
+
+        const status = (data.status || data.Status || '').toString().toLowerCase();
+        if(status === 'completed'){
+          // stop timers & show completed UI
+          clearInterval(timer); if(pollInterval) clearInterval(pollInterval);
+          countdownEl.textContent = '00:00';
+          statusText.textContent = '✅ Merchant has completed the order.';
+          completedBox.style.display = 'block'; completedBox.setAttribute('aria-hidden','false');
+          completedTime.textContent = (data.completed_time || new Date().toLocaleString());
+          // fill message
+          completedMsg.textContent = data.message || 'Payment received — order completed';
+          // reveal rating
+          ratingBox.style.display = 'flex';
+          // remove stored timer
+          localStorage.removeItem(storageKey);
+        }
+        // If merchant accepted but not completed, you could show an intermediate message (optional)
+        if((data.status || '').toLowerCase() === 'accepted'){
+          statusText.textContent = '✅ Merchant accepted the order and is making payment. Please wait...';
+        }
+      }catch(err){
+        console.error('Status check failed',err);
       }
     }
 
-    const statusInterval = setInterval(checkStatus, 5000);
+    // start polling every 5s but be gentle when page hidden
+    function startPolling(){ if(pollInterval) clearInterval(pollInterval); pollInterval = setInterval(()=>{ if(!document.hidden) checkStatus(); }, 5000); }
+    startPolling(); checkStatus();
 
-    document.getElementById("ratingForm").addEventListener("change", () => {
-      document.getElementById("thankYou").style.display = "block";
+    // copy order id
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(orderId);
+        copyBtn.textContent = 'Copied'; setTimeout(()=>copyBtn.textContent='Copy Order ID',1200);
+      }catch(e){
+        alert('Copy failed — select the Order ID and copy manually');
+      }
     });
-  </script>
-</body>
+
+    // contact button behaviour (opens Telegram chat if provided in query string 'merchant_chat')
+    contactBtn.addEventListener('click', ()=>{
+      const chat = params.get('merchant_chat');
+      if(chat){ window.open(chat, '_blank'); return; }
+      // fallback: try t.me with merchant username param
+      const user = params.get('merchant_username');
+      if(user){ window.open('https://t.me/' + user, '_blank'); return; }
+      alert('No merchant contact provided.');
+    });
+
+    // manual refresh
+    refreshBtn.addEventListener('click', ()=>{ checkStatus(); refreshBtn.textContent='Checking...'; setTimeout(()=>refreshBtn.textContent='Check Status',900); });
+
+    // rating handling (send to backend via same script as an 'action=rating' POST) — will not change backend URL but will attempt to POST
+    const ratingInputs = document.querySelectorAll('#ratingBox input');
+    ratingInputs.forEach(inp=>inp.addEventListener('change', async (e)=>{
+      const v = e.target.value;
+      thanksText.style.display = 'block';
+      // optimistic UI
+      ratingInputs.forEach(i=>{ i.disabled = true; });
+      try{
+        const body = new URLSearchParams({ action: 'submitRating', order_id: orderId, rating: v });
+        await fetch(checkStatusURL, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body });
+      }catch(err){ console.warn('Rating submit failed',err); }
+    }));
+
+    // accessibility: keyboard support for rating labels
+    document.querySelectorAll('#ratingBox label').forEach(lbl=>{
+      lbl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') lbl.click(); });
+    });
+
+    // cleanup on unload: stop polling to avoid browsers keeping work alive
+    window.addEventListener('beforeunload', ()=>{ if(pollInterval) clearInterval(pollInterval); if(timer) clearInterval(timer); });
+  </script></body>
 </html>
