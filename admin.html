@@ -1,284 +1,374 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Panel - P2Pforyou</title>
+  <meta name="description" content="Admin panel for P2Pforyou - view orders and mark them completed" />
   <style>
-    body {
-      background-color: #0d111c;
-      font-family: Arial, sans-serif;
-      color: #fff;
-      padding: 20px;
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 14px;
-      table-layout: fixed;
-    }
-    th, td {
-      border: 1px solid #555;
-      padding: 8px;
-      text-align: left;
-      word-wrap: break-word;
-      vertical-align: middle;
-    }
-    th {
-      background-color: #1e1f2b;
-    }
-    button {
-      background-color: #00ff88;
-      border: none;
-      color: #000;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 13px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    button:hover {
-      background-color: #00cc66;
-    }
-    .completed {
-      background-color: #00cc66;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 5px;
-      text-align: center;
-      width: 100%;
-      box-sizing: border-box;
-      font-size: 13px;
-    }
-    td:last-child {
-      text-align: center;
-    }
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr {
-        display: block;
-      }
-      thead {
-        display: none;
-      }
-      tr {
-        margin-bottom: 15px;
-        border: 1px solid #333;
-        padding: 10px;
-        border-radius: 8px;
-        background-color: #1a1a1a;
-      }
-      td {
-        padding: 8px;
-        text-align: left;
-        border-bottom: 1px solid #333;
-      }
-      td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: #aaa;
-        display: block;
-        margin-bottom: 5px;
-      }
-    }
+    :root{
+      --bg:#0b0f17;
+      --card:#0f1720;
+      --muted:#9aa4b2;
+      --accent:#00ff88;
+      --accent-2:#00cc66;
+      --glass: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.06);
+      --success: #00cc66;
+      --danger: #ff4d6d;
+      --radius:12px;
+      font-family: Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    }*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  padding:18px;
+  background:linear-gradient(180deg,#07101a 0%, #0b1220 100%);
+  color:#e6eef6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-y:auto;
+}
+
+header{display:flex;align-items:center;gap:12px}
+.logo{
+  background:linear-gradient(90deg,var(--accent),#33ffd4);
+  color:#000;
+  font-weight:700;
+  padding:8px 12px;
+  border-radius:10px;
+  box-shadow:0 6px 18px rgba(0,255,136,0.08), inset 0 -1px 0 rgba(255,255,255,0.06);
+  letter-spacing:0.6px;
+}
+h1{font-size:18px;margin:0}
+p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+.controls{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}
+.search{flex:1;min-width:160px}
+input[type=search]{
+  width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--glass);color:inherit;
+  outline:none;font-size:14px
+}
+.select, .btn {background:var(--card);border:1px solid var(--border);padding:10px;border-radius:10px}
+.btn{cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,var(--accent),#33ffd4);color:#000;border:none}
+
+.grid{
+  display:grid;grid-template-columns:1fr;gap:12px;margin-top:18px
+}
+
+/* table for wider screens */
+.table-wrap{display:block;overflow:auto;border-radius:12px;border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+table{width:100%;border-collapse:collapse;min-width:880px}
+th,td{padding:12px 14px;border-bottom:1px dashed rgba(255,255,255,0.03);text-align:left;font-size:13px;vertical-align:middle}
+th{position:sticky;top:0;background:rgba(10,12,18,0.7);backdrop-filter:blur(6px);z-index:2;font-weight:600;color:var(--muted)}
+td.small{width:120px}
+
+.status-pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
+.status-pending{background:rgba(255,255,255,0.03);color:var(--muted)}
+.status-completed{background:var(--success);color:#001;}
+
+button.mark{background:linear-gradient(180deg,var(--accent),var(--accent-2));border:none;padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer}
+button.mark:disabled{opacity:0.6;cursor:not-allowed}
+
+/* Responsive card list for small screens */
+.cards{display:none;flex-direction:column;gap:12px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.card-row{display:flex;justify-content:space-between;align-items:center}
+.card .meta{color:var(--muted);font-size:13px}
+
+/* small animation */
+@keyframes pop {from {transform:translateY(6px);opacity:0} to {transform:none;opacity:1}}
+tr{animation:pop .18s ease both}
+.fadein{animation:pop .22s ease both}
+
+/* toast */
+.toast{position:fixed;right:20px;bottom:20px;background:#0b1620;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 10px 30px rgba(2,6,23,0.6);color:var(--muted);display:flex;gap:8px;align-items:center}
+
+/* mobile adaptive */
+@media (max-width:880px){
+  table{min-width:680px}
+}
+@media (max-width:680px){
+  .table-wrap{display:none}
+  .cards{display:flex}
+  header{gap:10px}
+  h1{font-size:16px}
+  .controls{gap:8px}
+}
+
   </style>
-
-  <!-- 🔐 Admin Password -->
-  <script>
-    const correctPassword = "FTXPENGUJUP@";
-    const isLoggedIn = localStorage.getItem("p2p_admin");
-
-    if (isLoggedIn !== "true") {
-      const input = prompt("Enter admin password:");
-      if (input !== correctPassword) {
-        alert("❌ Access Denied!");
-        window.location.href = "/";
-      } else {
-        localStorage.setItem("p2p_admin", "true");
-      }
-    }
-  </script>
 </head>
 <body>
-  <h1>Admin Panel - P2Pforyou</h1>
-  <table id="ordersTable">
-    <thead>
-      <tr>
-        <th>Time</th>
-        <th>Order ID</th>
-        <th>Network</th>
-        <th>USDT</th>
-        <th>Rate</th>
-        <th>Total INR</th>
-        <th>Payment Mode</th>
-        <th>Bank Details</th>
-        <th>Status</th>
-        <th>Mark Complete</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <header>
+    <div class="logo">P2Pforyou</div>
+    <div>
+      <h1>Admin Panel</h1>
+      <p class="lead">View orders, search, filter and mark as completed — updates your existing Google Apps Script backend.</p>
+    </div>
+  </header>  <div class="controls">
+    <div class="search"><input id="searchInput" type="search" placeholder="Search by Order ID, network, payment mode..." /></div>
+    <div class="select"><select id="statusFilter"><option value="all">All statuses</option><option value="pending">Pending</option><option value="completed">Completed</option></select></div>
+    <div class="btn"><button id="refreshBtn" class="btn">Refresh</button></div>
+    <div style="margin-left:auto"><button id="newBtn" class="btn primary">Manual Refresh</button></div>
+  </div>  <div class="grid">
+    <div class="table-wrap" role="region" aria-label="Orders table">
+      <table id="ordersTable" aria-live="polite">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Order ID</th>
+            <th>Network</th>
+            <th>USDT</th>
+            <th>Rate</th>
+            <th>Total INR</th>
+            <th>Payment Mode</th>
+            <th>Bank Details</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div><div class="cards" id="cardsList" aria-hidden="true"></div>
 
-  <script>
+  </div>  <div id="toastHolder" style="display:none"></div>  <script>
+    // Backend endpoints (kept exactly as provided)
     const sheetCSVURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTW0zXjH1mV32I_KDfOwc-SIcp_0yHG5Dmudau-Bvy9Buqvqx1CE_xijbXhxNCpbQ-SnTnKq0o9ICgy/pub?output=csv";
     const updateURL = "https://script.google.com/macros/s/AKfycbxuTvGuI7VGakfHIXOip8yDy261HUo4ycW0FPqJNo1nVTteLAEbavONXtbAPEvKbXWE/exec";
 
-    const localStatusMap = {};
-    let lastOrderIDs = new Set();
-
-    function requestNotificationPermission() {
-      if ("Notification" in window) {
-        Notification.requestPermission().then(permission => {
-          if (permission !== "granted") {
-            console.warn("Notifications are disabled.");
-          }
-        });
-      }
-    }
-
-    function sendNotification(message) {
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("🔔 A NEW ORDER HAS ARRIVED!!", {
-          body: message,
-          icon: "https://cdn-icons-png.flaticon.com/512/1996/1996045.png"
-        });
-      }
-    }
-
-    function parseCSV(csvText) {
+    // Robust CSV parser (handles quoted fields and CRLF)
+    function parseCSV(text){
       const rows = [];
-      let insideQuotes = false, field = '', row = [];
+      let i = 0; const len = text.length;
+      let cur = '', row = [], inQuotes = false;
 
-      for (let i = 0; i < csvText.length; i++) {
-        const char = csvText[i], next = csvText[i + 1];
-        if (char === '"' && next === '"' && insideQuotes) {
-          field += '"';
-          i++;
-        } else if (char === '"') {
-          insideQuotes = !insideQuotes;
-        } else if (char === ',' && !insideQuotes) {
-          row.push(field);
-          field = '';
-        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
-          if (field || row.length) {
-            row.push(field);
-            if (row.some(cell => cell.trim())) rows.push(row);
-            row = [];
-            field = '';
+      while(i < len){
+        const ch = text[i];
+        const next = text[i+1];
+
+        if(ch === '"'){
+          if(inQuotes && next === '"'){ // escaped quote
+            cur += '"'; i += 2; continue;
           }
-          if (char === '\r' && next === '\n') i++;
-        } else {
-          field += char;
-        }
-      }
-
-      if (field || row.length) {
-        row.push(field);
-        if (row.some(cell => cell.trim())) rows.push(row);
-      }
-
-      return rows;
-    }
-
-    async function fetchOrders() {
-      try {
-        const res = await fetch(sheetCSVURL, { cache: "no-store" });
-        const csvText = await res.text();
-        const rows = parseCSV(csvText);
-        const headers = rows[0];
-        const dataRows = rows.slice(1).filter(r => r[1]?.trim());
-
-        const currentOrderIDs = new Set(dataRows.map(r => r[1]?.trim()));
-        const newOrders = [...currentOrderIDs].filter(id => !lastOrderIDs.has(id));
-
-        if (newOrders.length > 0) {
-          sendNotification(`${newOrders.length} new order(s) received.`);
+          inQuotes = !inQuotes; i++; continue;
         }
 
-        lastOrderIDs = currentOrderIDs;
+        if(!inQuotes && ch === ','){
+          row.push(cur); cur = ''; i++; continue;
+        }
 
-        const tbody = document.querySelector("#ordersTable tbody");
-        tbody.innerHTML = "";
+        if(!inQuotes && (ch === '\r' || ch === '\n')){
+          // end of row
+          row.push(cur); cur = '';
+          rows.push(row); row = [];
+          // skip CRLF pair
+          if(ch === '\r' && next === '\n') i += 2; else i++;
+          continue;
+        }
 
-        [...dataRows].reverse().forEach(row => {
-          const tr = document.createElement("tr");
-          const orderID = row[1]?.trim();
-          let status = row[8]?.toLowerCase();
-
-          if (localStatusMap[orderID]) {
-            status = localStatusMap[orderID];
-          }
-
-          row.slice(0, 9).forEach((cell, index) => {
-            const td = document.createElement("td");
-            td.setAttribute("data-label", headers[index]);
-            td.textContent = cell;
-            tr.appendChild(td);
-          });
-
-          const tdBtn = document.createElement("td");
-          tdBtn.setAttribute("data-label", "Mark Complete");
-
-          if (status === "completed") {
-            tdBtn.innerHTML = `<span class="completed">Completed</span>`;
-          } else {
-            const btn = document.createElement("button");
-            btn.textContent = "Mark Complete";
-            btn.onclick = () => markComplete(orderID, tr, btn);
-            tdBtn.appendChild(btn);
-          }
-
-          tr.appendChild(tdBtn);
-          tbody.appendChild(tr);
-        });
-
-      } catch (err) {
-        console.error("Fetch error:", err);
+        cur += ch; i++;
       }
+      // push last field
+      if(inQuotes){
+        // malformed but try to salvage
+        row.push(cur);
+        rows.push(row);
+      } else if(cur !== '' || row.length > 0){
+        row.push(cur);
+        rows.push(row);
+      }
+      return rows.map(r => r.map(c => c.trim()));
     }
 
-    async function markComplete(orderId, rowElement, button) {
-      if (!confirm("Mark this order as Completed?")) return;
+    // UI helpers
+    function toast(msg, time=3000){
+      const t = document.createElement('div');
+      t.className='toast'; t.textContent = msg; document.body.appendChild(t);
+      setTimeout(()=>{t.style.opacity='0'; t.style.transform='translateY(8px)';}, time-400);
+      setTimeout(()=>t.remove(), time);
+    }
 
-      button.disabled = true;
-      button.textContent = "Processing...";
+    // Render helpers
+    const tbody = document.querySelector('#ordersTable tbody');
+    const cards = document.getElementById('cardsList');
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
 
-      try {
-        const res = await fetch(updateURL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            action: "updateStatus",
-            order_id: orderId,
-            status: "Completed"
-          })
-        });
+    let allRows = [];
 
+    function makeRowElem(row, idx){
+      const tr = document.createElement('tr');
+      tr.className = 'fadein';
+      for(let col=0; col<9; col++){
+        const td = document.createElement('td');
+        td.textContent = row[col] ?? '';
+        if(col === 1) td.style.fontWeight = 700;
+        tr.appendChild(td);
+      }
+      const status = (row[8] || '').toLowerCase();
+      const statusTd = document.createElement('td');
+      statusTd.className = 'small';
+      const pill = document.createElement('span');
+      pill.className = 'status-pill ' + (status === 'completed' ? 'status-completed' : 'status-pending');
+      pill.textContent = status ? status.toUpperCase() : 'PENDING';
+      statusTd.appendChild(pill);
+      tr.appendChild(statusTd);
+
+      const actionTd = document.createElement('td');
+      actionTd.style.width = '140px';
+      if(status === 'completed'){
+        const s = document.createElement('div'); s.className='status-pill status-completed'; s.textContent='COMPLETED'; actionTd.appendChild(s);
+      } else {
+        const btn = document.createElement('button'); btn.className='mark'; btn.textContent='Mark Complete';
+        btn.onclick = ()=>markComplete(row[1], tr, btn);
+        actionTd.appendChild(btn);
+      }
+      tr.appendChild(actionTd);
+
+      return tr;
+    }
+
+    function makeCard(row){
+      const c = document.createElement('div'); c.className='card fadein';
+      const top = document.createElement('div'); top.className='card-row';
+      const left = document.createElement('div');
+      left.innerHTML = `<div style="font-weight:700">${row[1]||'—'}</div><div class="meta">${row[0]||'—'}</div>`;
+      const right = document.createElement('div');
+      const status = (row[8]||'').toLowerCase();
+      const pill = document.createElement('div'); pill.className='status-pill '+(status==='completed'?'status-completed':'status-pending'); pill.textContent = status?status.toUpperCase():'PENDING';
+      right.appendChild(pill);
+      top.appendChild(left); top.appendChild(right);
+      c.appendChild(top);
+
+      const body = document.createElement('div'); body.style.display='grid'; body.style.gridTemplateColumns='1fr 1fr'; body.style.gap='8px';
+      body.innerHTML = `
+        <div class="meta">Network: <strong>${row[2]||'—'}</strong></div>
+        <div class="meta">Amount: <strong>${row[3]||'—'}</strong></div>
+        <div class="meta">Rate: <strong>${row[4]||'—'}</strong></div>
+        <div class="meta">INR: <strong>${row[5]||'—'}</strong></div>
+        <div class="meta">Mode: <strong>${row[6]||'—'}</strong></div>
+        <div class="meta">Bank: <strong>${row[7]||'—'}</strong></div>
+      `;
+      c.appendChild(body);
+
+      const foot = document.createElement('div'); foot.style.display='flex'; foot.style.gap='8px'; foot.style.marginTop='8px';
+      if(status === 'completed'){
+        const s = document.createElement('div'); s.className='status-pill status-completed'; s.textContent='COMPLETED'; foot.appendChild(s);
+      } else {
+        const btn = document.createElement('button'); btn.className='mark'; btn.textContent='Mark Complete'; btn.onclick = ()=>markComplete(row[1], c, btn);
+        foot.appendChild(btn);
+      }
+      c.appendChild(foot);
+      return c;
+    }
+
+    function render(rows){
+      tbody.innerHTML=''; cards.innerHTML='';
+      rows.forEach((r, i)=>{
+        tbody.appendChild(makeRowElem(r,i));
+        cards.appendChild(makeCard(r));
+      });
+      // toggle aria-hidden for cards depending on width
+      const small = window.matchMedia('(max-width:680px)').matches;
+      cards.setAttribute('aria-hidden', small? 'false':'true');
+    }
+
+    // Filtering & searching
+    function filterAndRender(){
+      const q = searchInput.value.trim().toLowerCase();
+      const status = statusFilter.value;
+      const filtered = allRows.filter(r=>{
+        if(!r || r.length===0) return false;
+        if(status !== 'all'){
+          const s = (r[8]||'').toLowerCase();
+          if(status === 'pending' && s === 'completed') return false;
+          if(status === 'completed' && s !== 'completed') return false;
+        }
+        if(!q) return true;
+        return r.some(cell=> (cell||'').toString().toLowerCase().includes(q));
+      });
+      render(filtered.reverse()); // newest on top
+    }
+
+    // Fetch orders
+    let fetching = false;
+    async function fetchOrders(){
+      if(fetching) return; fetching = true;
+      try{
+        const res = await fetch(sheetCSVURL, {cache:'no-store'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const txt = await res.text();
+        const rows = parseCSV(txt);
+        // remove empty trailing rows and header
+        const cleaned = rows.filter(r=>r.length && r.some(c=>c && c.trim()!==''));
+        if(cleaned.length>0) cleaned.shift(); // drop header
+        allRows = cleaned;
+        filterAndRender();
+      }catch(e){
+        console.error('Fetch error',e); toast('Failed to load sheet — check sheet visibility');
+      }finally{fetching=false}
+    }
+
+    // Update status
+    async function markComplete(orderId, element, btn){
+      if(!orderId){ toast('Missing Order ID'); return; }
+      const proceed = confirm('Mark order '+orderId+' as Completed?'); if(!proceed) return;
+      if(btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
+      try{
+        const body = new URLSearchParams({ action: 'updateStatus', order_id: orderId, status: 'Completed' });
+        const res = await fetch(updateURL, { method:'POST', headers:{ 'Content-Type':'application/x-www-form-urlencoded' }, body });
         const text = await res.text();
-        if (text.includes("Success")) {
-          localStatusMap[orderId] = "completed";
-          rowElement.cells[8].textContent = "Completed";
-          rowElement.cells[9].innerHTML = `<span class="completed">Completed</span>`;
+        // backend in many Apps Script returns HTML or text containing "Success" — check loosely
+        if(/success/i.test(text)){
+          toast('Order marked completed');
+          // optimistic UI update: change status cell or card
+          // try to find order in table and update UI
+          const tds = document.querySelectorAll('tr');
+          for(const tr of tds){
+            if(tr.children[1] && tr.children[1].textContent.trim() === orderId){
+              if(tr.children[8]) tr.children[8].innerHTML = '';
+              if(tr.children[8]){
+                const s = document.createElement('span'); s.className='status-pill status-completed'; s.textContent='COMPLETED'; tr.children[8].appendChild(s);
+              }
+              if(tr.children[9]) tr.children[9].innerHTML = '';
+              if(tr.children[9]){ const s2 = document.createElement('div'); s2.className='status-pill status-completed'; s2.textContent='COMPLETED'; tr.children[9].appendChild(s2); }
+            }
+          }
+          // update cards
+          const cs = document.querySelectorAll('.card');
+          cs.forEach(card=>{
+            if(card.querySelector('div strong') && card.querySelector('div strong').textContent === orderId){
+              const btns = card.querySelectorAll('button'); btns.forEach(b=>b.remove());
+              const s = document.createElement('div'); s.className='status-pill status-completed'; s.textContent='COMPLETED'; card.appendChild(s);
+            }
+          });
         } else {
-          alert("❌ Update failed: " + text);
-          button.disabled = false;
-          button.textContent = "Mark Complete";
+          throw new Error('Update response: '+text);
         }
-      } catch (e) {
-        alert("❌ Network error.");
-        console.error(e);
-        button.disabled = false;
-        button.textContent = "Mark Complete";
+      }catch(e){
+        console.error(e); toast('Failed to update order: ' + (e.message||e));
+        if(btn){ btn.disabled = false; btn.textContent = 'Mark Complete'; }
       }
     }
 
-    window.onload = () => {
-      requestNotificationPermission();
-      fetchOrders();
-      setInterval(fetchOrders, 15000); // refresh every 15 sec
-    };
-  </script>
-</body>
+    // event listeners
+    searchInput.addEventListener('input', ()=>{ debounce(filterAndRender, 200)(); });
+    statusFilter.addEventListener('change', filterAndRender);
+    document.getElementById('refreshBtn').addEventListener('click', fetchOrders);
+    document.getElementById('newBtn').addEventListener('click', fetchOrders);
+
+    // simple debounce
+    function debounce(fn, wait){ let t; return function(){ clearTimeout(t); t = setTimeout(()=>fn.apply(this, arguments), wait); } }
+
+    // auto refresh every 15s but be gentle
+    let poll = setInterval(()=>{ if(!document.hidden) fetchOrders(); }, 15000);
+
+    // initial
+    fetchOrders();
+
+    // expose for debugging
+    window._p2p = { fetchOrders, markComplete, allRows };
+  </script></body>
 </html>
